@@ -1,0 +1,5 @@
+- [ ] Modernize `SplashView` with clean background and refined animations
+- [ ] Update `LoginView` with iOS-style cards, text, and staggered animations
+- [ ] Update `RegisterView` with matching iOS aesthetic and entry animations
+- [ ] Replace all deprecated `withOpacity` with `withValues`
+- [ ] Verify functional integrity of auth flow
