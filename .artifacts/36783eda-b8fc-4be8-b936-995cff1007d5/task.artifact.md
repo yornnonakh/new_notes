@@ -1,5 +1,0 @@
-- [ ] Inject `FolderService` into `SearchController`
-- [ ] Implement dual-fetching logic in `SearchController.search()`
-- [ ] Update `SearchView` to render separate sections for Folders and Notes
-- [ ] Connect folder results to `NOTE_LIST` navigation
-- [ ] Final visual and API verification
