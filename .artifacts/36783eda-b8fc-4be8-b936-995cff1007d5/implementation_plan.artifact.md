@@ -1,33 +1,34 @@
-# Implementation Plan - Modern Auth & Splash UI Refinement
+# Implementation Plan - iOS Folder UI & Profile Integration
 
-Modernize the Splash, Login, and Register screens with smooth animations and the updated iOS-style color palette.
+Update the Folders screen to perfectly match the iOS Notes aesthetic and integrate the Profile entry into the folder list.
 
 ## Proposed Changes
 
-### Theme & Colors
-- All screens will now strictly use `AppTheme.bodyColor` (0xFFF2F2F7) as the background.
-- UI elements will use `AppTheme.textPrimary`, `AppTheme.textSecondary`, and `AppTheme.folderYellow`.
-- Replace all deprecated `withOpacity` calls with `withValues(alpha: ...)`.
+### Folder Module Refinement
+#### [MODIFY] [folder_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/folder/folder_view.dart)
+- **Top Actions**:
+    - Ensure "Edit" text button transitions to the yellow circular checkmark in edit mode.
+    - Match the "New Folder" icon (`Icons.create_new_folder_outlined`) and spacing.
+- **Folder List (Edit Mode Fidelity)**:
+    - System folders ("All on My iPhone", "Notes", "Recently Deleted") will be dimmed to 15% opacity and disabled when `isEditing` is true.
+    - User folders will show the yellow circular more icon (`Icons.more_horiz` in a circle) and the reorder handle.
+- **Profile Integration**:
+    - Add a "Profile" tile at the bottom of the "On My iPhone" card group.
+    - Use a person icon (`Icons.person_outline`) and navigate to the Profile screen on tap.
+    - Ensure it also dims during edit mode as it's a system-level navigation.
+- **Bottom Bar**:
+    - Refine the floating rounded search bar with microphone.
+    - Use the `Icons.open_in_new` (or similar iOS-style compose icon) on the far right.
 
-### Splash Screen
-#### [MODIFY] [splash_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/splash/splash_view.dart)
-- **Background**: Switch from a harsh orange gradient to the clean `bodyColor`.
-- **Animation**: Refine the icon scale and shimmer effect. Add a fade-in for the "Piisiit Note" text with a slight slide-up.
-
-### Authentication Screens
-#### [MODIFY] [login_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/auth/login_view.dart)
-- **Structure**: Replace the dark glass container with a clean, high-opacity white `LiquidGlassContainer` (80-100% opacity) to match the Folder list cards.
-- **Typography**: Switch all text to `AppTheme.textPrimary` and `AppTheme.textSecondary`.
-- **Input Fields**: Update to match the Search bar style (rounded corners, subtle borders).
-- **Animations**:
-    - Staggered fade-in and slide-up for title, subtitle, and input fields.
-    - Button pulse animation on loading.
-
-#### [MODIFY] [register_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/auth/register_view.dart)
-- **Style Consistency**: Apply the same clean, white-on-gray aesthetic as the Login view.
-- **Animations**: Implement matching entry animations for a seamless transition between login and register.
+#### [MODIFY] [folder_controller.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/folder/folder_controller.dart)
+- Update `isSystemFolder` to include the "Profile" entry to ensure correct edit-mode behavior.
 
 ## Verification Plan
-- **Visual Match**: Verify that the auth screens look like part of the same app as the Folders and Notes screens.
-- **Animation Smoothness**: Confirm that transitions are fluid and non-blocking.
-- **Functional Check**: Verify that Login and Register still correctly communicate with the `AuthController` and backend.
+
+### Manual Verification
+- **Visual Check**: Open the folder list and verify it matches the provided screenshot (padding, typography, colors).
+- **Edit Mode**: Toggle edit mode and verify:
+    - The header button changes correctly.
+    - System folders (and Profile) are faded.
+    - Custom folders show the management icons.
+- **Profile Tap**: Verify tapping the new Profile entry navigates to the Profile screen.

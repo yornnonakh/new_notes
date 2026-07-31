@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../widgets/glass_widgets.dart';
+import '../../theme/app_theme.dart';
 import '../../routes/app_pages.dart';
 import 'auth_controller.dart';
 
@@ -11,113 +11,141 @@ class LoginView extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Gradient Circles
-          Positioned(
-            top: -50,
-            right: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.orange.withOpacity(0.4),
-              ),
-            ),
-          ),
-          
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: LiquidGlassContainer(
-                height: 500,
+      backgroundColor: AppTheme.bodyColor,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo or Icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5)),
+                  ],
+                ),
+                child: const Icon(Icons.note_alt_rounded, size: 50, color: AppTheme.folderYellow),
+              ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+              
+              const SizedBox(height: 32),
+              
+              const Text(
+                "Welcome Back",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+              
+              const SizedBox(height: 8),
+              
+              const Text(
+                "Login to your account",
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+              ).animate().fadeIn(delay: 300.ms),
+              
+              const SizedBox(height: 40),
+              
+              // Login Card
+              Container(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Welcome Back",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ).animate().fadeIn().slideY(begin: -0.5, end: 0),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Login to your account",
-                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
-                    const SizedBox(height: 40),
-                    
-                    TextField(
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildTextField(
                       controller: controller.phoneController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: "Phone Number",
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                        prefixIcon: const Icon(Icons.phone, color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      hint: "Phone Number",
+                      icon: Icons.phone_outlined,
                     ),
                     const SizedBox(height: 20),
-                    
-                    TextField(
+                    _buildTextField(
                       controller: controller.passwordController,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: "Password",
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                        prefixIcon: const Icon(Icons.lock, color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      hint: "Password",
+                      icon: Icons.lock_outline,
+                      isPassword: true,
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 32),
                     
                     Obx(() => SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: controller.isLoading.value ? null : controller.login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: AppTheme.folderYellow,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: controller.isLoading.value 
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("LOGIN", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text("LOGIN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     )),
-                    
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () => Get.toNamed(Routes.REGISTER),
-                      child: const Text(
-                        "Don't have an account? Register",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
                   ],
                 ),
-              ),
-            ),
+              ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+              
+              const SizedBox(height: 32),
+              
+              TextButton(
+                onPressed: () => Get.toNamed(Routes.REGISTER),
+                child: const Text(
+                  "Don't have an account? Register",
+                  style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                ),
+              ).animate().fadeIn(delay: 600.ms),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.bodyColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword,
+        style: const TextStyle(color: AppTheme.textPrimary),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: AppTheme.textGrey),
+          prefixIcon: Icon(icon, color: AppTheme.textGrey),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
       ),
     );
   }
