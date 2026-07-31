@@ -28,41 +28,57 @@ class FolderView extends GetView<FolderController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
-                      onPressed: () => Get.bottomSheet(
-                        FolderCreateModal(controller: controller),
-                        isScrollControlled: true,
+                    LiquidGlassContainer(
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      child: IconButton(
+                        onPressed: () => Get.bottomSheet(
+                          FolderCreateModal(controller: controller),
+                          isScrollControlled: true,
+                        ),
+                        icon: const Icon(Icons.create_new_folder_outlined, color: AppTheme.textPrimary, size: 24),
                       ),
-                      icon: const Icon(Icons.create_new_folder_outlined, color: AppTheme.textPrimary, size: 28),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 12),
                     Obx(() => controller.isEditing.value
-                        ? GestureDetector(
-                            onTap: controller.toggleEditing,
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.folderYellow,
+                        ? LiquidGlassContainer(
+                            width: 44,
+                            height: 44,
+                            borderRadius: 22,
+                            child: GestureDetector(
+                              onTap: controller.toggleEditing,
+                              child: Center(
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppTheme.folderYellow,
+                                  ),
+                                  child: const Icon(Icons.check, color: Colors.white, size: 20),
+                                ),
                               ),
-                              child: const Icon(Icons.check, color: Colors.white, size: 20),
                             ),
                           )
-                        : TextButton(
-                            onPressed: controller.toggleEditing,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              "Edit",
-                              style: TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w400,
+                        : LiquidGlassContainer(
+                            height: 44,
+                            borderRadius: 22,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: TextButton(
+                              onPressed: controller.toggleEditing,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                "Edit",
+                                style: TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             ),
                           )),
@@ -144,24 +160,20 @@ class FolderView extends GetView<FolderController> {
   Widget _buildFolderGroup(BuildContext context, List<FolderModel> folders, {bool includeRecentlyDeleted = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            for (int i = 0; i < folders.length; i++) ...[
-              _buildFolderTile(context, folders[i]),
-              const Divider(indent: 56, height: 1),
-            ],
-            if (includeRecentlyDeleted) ...[
-              _buildRecentlyDeletedTile(context),
-              const Divider(indent: 56, height: 1),
-              _buildProfileTile(context),
-            ],
+      child: GlassCard(
+        borderRadius: 20,
+        padding: EdgeInsets.zero,
+        children: [
+          for (int i = 0; i < folders.length; i++) ...[
+            _buildFolderTile(context, folders[i]),
+            const Divider(indent: 56, height: 1),
           ],
-        ),
+          if (includeRecentlyDeleted) ...[
+            _buildRecentlyDeletedTile(context),
+            const Divider(indent: 56, height: 1),
+            _buildProfileTile(context),
+          ],
+        ],
       ),
     );
   }
@@ -320,9 +332,14 @@ class FolderView extends GetView<FolderController> {
               ),
             ),
             const SizedBox(width: 16),
-            IconButton(
-              onPressed: () => controller.createNewNote(),
-              icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 28),
+            LiquidGlassContainer(
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              child: IconButton(
+                onPressed: () => controller.createNewNote(),
+                icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 28),
+              ),
             ),
           ],
         ),
