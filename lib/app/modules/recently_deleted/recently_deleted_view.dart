@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/models/note_model.dart';
-import '../../routes/app_pages.dart';
+import '../../data/models/folder_model.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_widgets.dart';
 import 'recently_deleted_controller.dart';
@@ -32,220 +32,112 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
             SliverToBoxAdapter(
               child: _pageContent(
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    _horizontalInset(context),
-                    0,
-                    _horizontalInset(context),
-                    14,
-                  ),
+                  padding: EdgeInsets.fromLTRB(_horizontalInset(context), 0, _horizontalInset(context), 14),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _glassControl(
-                        context,
-                        key: const ValueKey('recently-deleted-back-button'),
-                        width: topControlHeight,
-                        height: topControlHeight,
-                        borderRadius: topControlHeight / 2,
-                        label: 'Back to folders',
+                      GestureDetector(
                         onTap: Get.back,
-                        child: Icon(
-                          CupertinoIcons.chevron_back,
-                          color: _controlColor(context),
-                          size: 27,
+                        child: Container(
+                          width: topControlHeight,
+                          height: topControlHeight,
+                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          child: Icon(CupertinoIcons.chevron_back, color: AppTheme.folderYellow, size: 27),
                         ),
                       ),
-                      Obx(
-                        () {
-                          if (controller.isEditing.value) {
-                            return GestureDetector(
-                              onTap: controller.toggleEditing,
-                              child: Container(
-                                width: topControlHeight,
-                                height: topControlHeight,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  CupertinoIcons.checkmark,
-                                  color: _primaryTextColor(context),
-                                  size: 20,
-                                ),
-                              ),
-                            );
-                          }
-
-                          return _glassControl(
-                            context,
-                            key: const ValueKey('recently-deleted-edit-button'),
-                            width: editControlWidth,
-                            height: topControlHeight,
-                            borderRadius: topControlHeight / 2,
-                            label: 'Edit deleted notes',
+                      Obx(() => controller.isEditing.value
+                        ? GestureDetector(
                             onTap: controller.toggleEditing,
-                            child: Text(
-                              'Edit',
-                              style: TextStyle(
-                                color: _controlColor(context),
-                                fontFamily: _textFont,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: -0.25,
-                                height: 1,
-                              ),
+                            child: Container(
+                              width: topControlHeight,
+                              height: topControlHeight,
+                              decoration: const BoxDecoration(color: AppTheme.folderYellow, shape: BoxShape.circle),
+                              child: const Icon(CupertinoIcons.checkmark, color: Colors.white, size: 20),
                             ),
-                          );
-                        },
+                          )
+                        : TextButton(
+                            onPressed: controller.toggleEditing,
+                            child: const Text("Edit", style: TextStyle(color: AppTheme.textPrimary, fontSize: 17, fontWeight: FontWeight.w600)),
+                          ),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
+            
             SliverToBoxAdapter(
               child: _pageContent(
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    _horizontalInset(context),
-                    7,
-                    _horizontalInset(context),
-                    0,
-                  ),
+                  padding: EdgeInsets.fromLTRB(_horizontalInset(context), 7, _horizontalInset(context), 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Recently Deleted',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: _primaryTextColor(context),
-                          fontFamily: _displayFont,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -1.05,
-                          height: 1.08,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Obx(
-                        () => Text(
-                          _noteCountLabel(controller.deletedNotes.length),
-                          style: TextStyle(
-                            color: _secondaryTextColor(context),
-                            fontFamily: _textFont,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -0.2,
-                            height: 1.15,
-                          ),
-                        ),
-                      ),
+                      Text('Recently Deleted', style: TextStyle(color: _primaryTextColor(context), fontFamily: _displayFont, fontSize: 34, fontWeight: FontWeight.bold)),
+                      Obx(() => Text('${controller.deletedNotes.length + controller.deletedFolders.length} Items', 
+                        style: TextStyle(color: _secondaryTextColor(context), fontSize: 15))),
                     ],
                   ),
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: _pageContent(
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    _horizontalInset(context) + 10,
-                    5,
-                    _horizontalInset(context) + 10,
-                    16,
-                  ),
-                  child: Text(
-                    'Deleted notes are removed from your devices after 30 '
-                    'days, which may require Notes to be open. Permanent '
-                    'deletion from iCloud may take up to 40 more days.',
-                    style: TextStyle(
-                      color: _secondaryTextColor(context),
-                      fontFamily: _textFont,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.05,
-                      height: 1.28,
-                    ),
-                  ),
+
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  "Notes are available here for 30 days. After that time, notes will be permanently deleted. This may take up to 40 days.",
+                  style: TextStyle(color: AppTheme.textGrey, fontSize: 13, height: 1.3),
                 ),
               ),
             ),
+
             Obx(() {
               if (controller.isLoading.value) {
-                return SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: CupertinoActivityIndicator(
-                      color: _secondaryTextColor(context),
-                    ),
-                  ),
-                );
+                return const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: AppTheme.folderYellow)));
               }
 
-              if (controller.deletedNotes.isEmpty) {
+              if (controller.deletedNotes.isEmpty && controller.deletedFolders.isEmpty) {
                 return SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _pageContent(
-                    Center(
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          'No Deleted Notes',
-                          style: TextStyle(
-                            color: _secondaryTextColor(context),
-                            fontFamily: _textFont,
-                            fontSize: 17,
-                          ),
+                  hasScrollBody: false, 
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.delete, size: 60, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        Text("No Deleted Items", style: TextStyle(color: AppTheme.textGrey, fontSize: 17)),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: controller.fetchDeletedItems,
+                          child: const Text("Refresh"),
                         ),
-                      ),
-                    ),
-                  ),
+                      ],
+                    )
+                  )
                 );
               }
 
               return SliverToBoxAdapter(
                 child: _pageContent(
                   Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: _horizontalInset(context),
-                    ),
-                    child: Material(
-                      color: _cardColor(context),
-                      borderRadius: BorderRadius.circular(22),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (
-                            var index = 0;
-                            index < controller.deletedNotes.length;
-                            index++
-                          ) ...[
-                            _buildNoteTile(
-                              context,
-                              controller.deletedNotes[index],
-                            ),
-                            if (index < controller.deletedNotes.length - 1)
-                              Container(
-                                height: 0.5,
-                                margin: const EdgeInsets.only(
-                                  left: 26,
-                                  right: 18,
-                                ),
-                                color: _dividerColor(context),
-                              ),
-                          ],
+                    padding: EdgeInsets.symmetric(horizontal: _horizontalInset(context), vertical: 16),
+                    child: GlassCard(
+                      borderRadius: 20,
+                      children: [
+                        // Render Folders first
+                        for (int i = 0; i < controller.deletedFolders.length; i++) ...[
+                          _buildFolderTile(context, controller.deletedFolders[i]),
+                          if (i < controller.deletedFolders.length - 1 || controller.deletedNotes.isNotEmpty)
+                            const Divider(indent: 56, height: 1),
                         ],
-                      ),
+                        // Render Notes
+                      for (int i = 0; i < controller.deletedNotes.length; i++) ...[
+                        _buildNoteTile(context, controller.deletedNotes[i]),
+                        if (i < controller.deletedNotes.length - 1)
+                          const Divider(indent: 56, height: 1),
+                      ],
+                      ],
                     ),
                   ),
                 ),
@@ -255,418 +147,110 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
           ],
         ),
       ),
-      bottomNavigationBar: Obx(() {
-        if (controller.isEditing.value) {
-          return _buildEditBottomBar(context);
-        }
-        return _buildBottomBar(context);
-      }),
+      bottomNavigationBar: Obx(() => controller.isEditing.value ? _buildEditBottomBar(context) : const SizedBox.shrink()),
     );
+  }
+
+  Widget _buildFolderTile(BuildContext context, FolderModel folder) {
+    return Obx(() {
+      final isSelected = controller.selectedFolderIds.contains(folder.id);
+      return ListTile(
+        onTap: controller.isEditing.value ? () => controller.toggleSelectFolder(folder.id) : null,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (controller.isEditing.value)
+              _buildSelectionIndicator(isSelected),
+            Icon(folder.icon, color: folder.color, size: 24),
+          ],
+        ),
+        title: Text(folder.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+        subtitle: const Text("Folder", style: TextStyle(fontSize: 13, color: AppTheme.textGrey)),
+      );
+    });
   }
 
   Widget _buildNoteTile(BuildContext context, NoteModel note) {
     final attachmentCount = note.content.whereType<AttachmentBlock>().length;
-    final title = note.title.trim().isEmpty ? 'New Note' : note.title.trim();
-    final subtitle = _noteSubtitle(note, attachmentCount);
-
     return Obx(() {
-      final isEditing = controller.isEditing.value;
       final isSelected = controller.selectedNoteIds.contains(note.id);
-
-      return GestureDetector(
-        onTap: isEditing ? () => controller.toggleSelectNote(note.id) : null,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 55),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
-            child: Row(
-              children: [
-                if (isEditing) ...[
-                  Container(
-                    width: 22,
-                    height: 22,
-                    margin: const EdgeInsets.only(right: 12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected ? AppTheme.textPrimary : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? AppTheme.textPrimary : Colors.grey.shade400,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: isSelected
-                        ? const Icon(
-                            CupertinoIcons.checkmark,
-                            color: Colors.white,
-                            size: 13,
-                          )
-                        : null,
-                  ),
-                ],
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: _primaryTextColor(context),
-                          fontFamily: _textFont,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.3,
-                          height: 1.12,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: _secondaryTextColor(context),
-                          fontFamily: _textFont,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: -0.15,
-                          height: 1.12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      return ListTile(
+        onTap: controller.isEditing.value ? () => controller.toggleSelectNote(note.id) : null,
+        leading: controller.isEditing.value ? _buildSelectionIndicator(isSelected) : null,
+        title: Text(note.title.isEmpty ? "New Note" : note.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+        subtitle: Text("${_formatDate(note.updatedAt)}  ${attachmentCount > 0 ? '$attachmentCount attachments' : _getContentSnippet(note)}", 
+          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, color: AppTheme.textGrey)),
+        trailing: const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
       );
     });
+  }
+
+  Widget _buildSelectionIndicator(bool isSelected) {
+    return Container(
+      width: 22, height: 22,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? AppTheme.textPrimary : Colors.transparent,
+        border: Border.all(color: isSelected ? AppTheme.textPrimary : Colors.grey.shade400, width: 1.5),
+      ),
+      child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+    );
   }
 
   Widget _buildEditBottomBar(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Obx(() {
-          final selectedCount = controller.selectedNoteIds.length;
-          final recoverText = selectedCount == 0
-              ? "Move All"
-              : selectedCount == 1
-                  ? "Recover"
-                  : "Recover ($selectedCount)";
-          final deleteText = selectedCount == 0
-              ? "Delete All"
-              : selectedCount == 1
-                  ? "Delete"
-                  : "Delete ($selectedCount)";
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: controller.recoverSelectedNotes,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    recoverText,
-                    style: TextStyle(
-                      color: _primaryTextColor(context),
-                      fontFamily: _textFont,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: controller.deletePermanentlySelectedNotes,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    deleteText,
-                    style: TextStyle(
-                      color: _primaryTextColor(context),
-                      fontFamily: _textFont,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildBottomBar(BuildContext context) {
-    final controlHeight = _scaledControlHeight(context, 44);
-
-    return ColoredBox(
-      color: _backgroundColor(context),
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 12),
-        child: _pageContent(
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              _horizontalInset(context) + 4,
-              8,
-              _horizontalInset(context) + 4,
-              0,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _glassControl(
-                    context,
-                    key: const ValueKey('recently-deleted-search-button'),
-                    height: controlHeight,
-                    borderRadius: controlHeight / 2,
-                    label: 'Search notes',
-                    onTap: () => Get.toNamed(Routes.SEARCH),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Icon(
-                            CupertinoIcons.search,
-                            color: _controlColor(context),
-                            size: 23,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'Search',
-                              style: TextStyle(
-                                color: _secondaryTextColor(context),
-                                fontFamily: _textFont,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            CupertinoIcons.mic,
-                            color: _controlColor(context),
-                            size: 22,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Semantics(
-                  label: 'New note',
-                  image: true,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(controlHeight / 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: _isDark(context) ? 0.3 : 0.08,
-                          ),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: LiquidGlassContainer(
-                      width: controlHeight,
-                      height: controlHeight,
-                      borderRadius: controlHeight / 2,
-                      opacity: 0.88,
-                      child: Center(
-                        child: Icon(
-                          CupertinoIcons.square_pencil,
-                          color: _controlColor(context),
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _glassControl(
-    BuildContext context, {
-    Key? key,
-    double? width,
-    required double height,
-    required double borderRadius,
-    required String label,
-    required VoidCallback onTap,
-    required Widget child,
-  }) {
-    final isDark = _isDark(context);
-
-    return Semantics(
-      key: key,
-      button: true,
-      label: label,
-      onTap: onTap,
-      excludeSemantics: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _actionButton("Recover", onTap: controller.recoverSelectedItems),
+            _actionButton("Delete", color: Colors.redAccent, onTap: controller.deletePermanentlySelectedItems),
           ],
         ),
-        child: LiquidGlassContainer(
-          width: width,
-          height: height,
-          borderRadius: borderRadius,
-          opacity: 0.88,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              excludeFromSemantics: true,
-              child: Center(child: child),
-            ),
-          ),
-        ),
       ),
     );
   }
 
-  String _noteCountLabel(int count) =>
-      '$count ${count == 1 ? 'Note' : 'Notes'}';
-
-  String _noteSubtitle(NoteModel note, int attachmentCount) {
-    final parts = <String>[];
-    final date = _formatDate(note.updatedAt);
-    if (date.isNotEmpty) parts.add(date);
-
-    final snippet = _getContentSnippet(note);
-    if (snippet.isNotEmpty) {
-      parts.add(snippet);
-    } else if (attachmentCount > 0) {
-      parts.add(
-        '$attachmentCount ${attachmentCount == 1 ? 'attachment' : 'attachments'}',
-      );
-    }
-
-    return parts.isEmpty ? 'No additional text' : parts.join('  ');
+  Widget _actionButton(String label, {Color? color, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: Text(label, style: TextStyle(color: color ?? AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
+      ),
+    );
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return '';
+    if (date == null) return "";
     final now = DateTime.now();
-    if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day) {
-      return DateFormat('HH:mm').format(date);
-    }
+    if (date.year == now.year && date.month == now.month && date.day == now.day) return DateFormat('HH:mm').format(date);
     return DateFormat('MM/dd/yy').format(date);
   }
 
   String _getContentSnippet(NoteModel note) {
-    final textBlock =
-        note.content.firstWhereOrNull((block) => block is TextBlock)
-            as TextBlock?;
+    final textBlock = note.content.firstWhereOrNull((b) => b is TextBlock) as TextBlock?;
     return textBlock?.text.trim().replaceAll(RegExp(r'\s+'), ' ') ?? '';
   }
 
   Widget _pageContent(Widget child) {
-    return Align(
-      alignment: Alignment.topCenter,
-      heightFactor: 1,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-        child: SizedBox(width: double.infinity, child: child),
-      ),
-    );
+    return Align(alignment: Alignment.topCenter, heightFactor: 1, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: _maxContentWidth), child: SizedBox(width: double.infinity, child: child)));
   }
 
-  double _horizontalInset(BuildContext context) {
-    return (MediaQuery.sizeOf(context).width * 0.05).clamp(16.0, 24.0);
-  }
-
-  double _scaledControlHeight(BuildContext context, double baseHeight) {
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final growth = (scale - 1).clamp(0.0, 1.0);
-    return baseHeight + (growth * 12);
-  }
-
-  double _scaledControlWidth(BuildContext context, double baseWidth) {
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final growth = (scale - 1).clamp(0.0, 1.0);
-    return baseWidth + (growth * 28);
-  }
-
-  bool _isDark(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
-
-  Color _backgroundColor(BuildContext context) {
-    return _isDark(context) ? const Color(0xFF000000) : AppTheme.bodyColor;
-  }
-
-  Color _cardColor(BuildContext context) {
-    return _isDark(context) ? const Color(0xFF1C1C1E) : AppTheme.cardColor;
-  }
-
-  Color _primaryTextColor(BuildContext context) {
-    return _isDark(context) ? Colors.white : AppTheme.textPrimary;
-  }
-
-  Color _secondaryTextColor(BuildContext context) {
-    return _isDark(context) ? const Color(0xFF98989D) : AppTheme.textGrey;
-  }
-
-  Color _controlColor(BuildContext context) {
-    return _isDark(context) ? Colors.white : AppTheme.textPrimary;
-  }
-
-  Color _dividerColor(BuildContext context) {
-    return _isDark(context) ? const Color(0xFF38383A) : AppTheme.dividerColor;
-  }
+  double _horizontalInset(BuildContext context) => (MediaQuery.sizeOf(context).width * 0.05).clamp(16.0, 24.0);
+  double _scaledControlHeight(BuildContext context, double baseHeight) => baseHeight + ((MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0.0, 1.0) * 12);
+  double _scaledControlWidth(BuildContext context, double baseWidth) => baseWidth + ((MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0.0, 1.0) * 28);
+  Color _primaryTextColor(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? Colors.white : AppTheme.textPrimary;
+  Color _secondaryTextColor(BuildContext context) => Theme.of(context).brightness == Brightness.dark ? const Color(0xFF98989D) : AppTheme.textGrey;
+  bool _isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  Color _backgroundColor(BuildContext context) => _isDark(context) ? const Color(0xFF000000) : AppTheme.bodyColor;
+  Color _cardColor(BuildContext context) => _isDark(context) ? const Color(0xFF1C1C1E) : AppTheme.cardColor;
+  Color _dividerColor(BuildContext context) => _isDark(context) ? const Color(0xFF38383A) : AppTheme.dividerColor;
 }

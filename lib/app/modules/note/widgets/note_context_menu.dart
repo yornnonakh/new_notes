@@ -4,6 +4,8 @@ import '../../../theme/app_theme.dart';
 import '../../../widgets/glass_widgets.dart';
 import '../note_controller.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 class NoteContextMenu extends StatelessWidget {
   final NoteController controller;
 
@@ -11,67 +13,82 @@ class NoteContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Center(
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: () => Get.back(),
+        behavior: HitTestBehavior.opaque,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: LiquidGlassContainer(
-            borderRadius: 16,
-            opacity: 0.95,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildMenuItem(
-                  "View as Gallery",
-                  Icons.grid_view_rounded,
-                  onTap: () {
-                    Get.back();
-                    controller.toggleViewMode();
-                  },
+          padding: const EdgeInsets.fromLTRB(40, 60, 20, 0), // Anchored to top-right
+          child: Align(
+            alignment: Alignment.topRight,
+            child: GestureDetector(
+              onTap: () {}, // Prevent taps on the menu itself from closing it
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 250),
+                child: LiquidGlassContainer(
+                  borderRadius: 16,
+                  opacity: 0.98,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuItem(
+                        "View as Gallery",
+                        Icons.grid_view_rounded,
+                        onTap: () {
+                          Get.back();
+                          controller.toggleViewMode();
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildMenuItem(
+                        "Select Notes",
+                        Icons.check_circle_outline,
+                        onTap: () {
+                          Get.back();
+                          controller.toggleEditing();
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildMenuItem(
+                        "Sort By",
+                        Icons.swap_vert_rounded,
+                        subtitle: "Default (Date Edited)",
+                        trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
+                        onTap: () {
+                          Get.back();
+                          controller.updateSorting("Date Edited");
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildMenuItem(
+                        "Group By Date",
+                        Icons.calendar_view_day_rounded,
+                        subtitle: "Default (On)",
+                        trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
+                        onTap: () {
+                          Get.back();
+                          controller.toggleDateGrouping();
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildMenuItem(
+                        "View Attachments",
+                        Icons.attach_file_rounded,
+                        onTap: () {
+                          Get.back();
+                          controller.viewAllAttachments();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                _buildDivider(),
-                _buildMenuItem(
-                  "Select Notes",
-                  Icons.check_circle_outline,
-                  onTap: () {
-                    Get.back();
-                    controller.toggleEditing();
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  "Sort By",
-                  Icons.swap_vert_rounded,
-                  subtitle: "Default (Date Edited)",
-                  trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                  onTap: () {
-                    Get.back();
-                    controller.updateSorting("Date Edited");
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  "Group By Date",
-                  Icons.calendar_view_day_rounded,
-                  subtitle: "Default (On)",
-                  trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                  onTap: () {
-                    Get.back();
-                    controller.toggleDateGrouping();
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  "View Attachments",
-                  Icons.attach_file_rounded,
-                  onTap: () {
-                    Get.back();
-                    controller.viewAllAttachments();
-                  },
-                ),
-              ],
+              ).animate().scale(
+                duration: 200.ms,
+                curve: Curves.easeOutBack,
+                alignment: Alignment.topRight,
+              ).fadeIn(duration: 150.ms),
             ),
           ),
         ),

@@ -1,4 +1,5 @@
-- [ ] Update `NoteController` with note list action stubs
-- [ ] Create `NoteContextMenu` widget with high-fidelity iOS styling
-- [ ] Replace `PopupMenuButton` in `NoteListView` with the new context menu trigger
-- [ ] Verify visual match and "Select Notes" functional link
+- [ ] Update `NoteService` to combine `trash` and `archive` notes
+- [ ] Refine `RecentlyDeletedController` with robust fetching and auto-refresh
+- [ ] Refine `TrashController` to match the new fetching logic
+- [ ] Update `RecentlyDeletedView` and `TrashView` visuals
+- [ ] Verify data visibility with live delete actions

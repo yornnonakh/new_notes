@@ -25,8 +25,13 @@ class NoteService extends GetxService {
     final data = response.data['data'];
     if (data == null) return [];
     
+    // Combine trash and archive just in case the backend uses archive for deleted items
     final List trashList = data['trash'] ?? [];
-    return trashList
+    final List archiveList = data['archive'] ?? [];
+    
+    final List combined = [...trashList, ...archiveList];
+    
+    return combined
         .map((e) => NoteModel.fromJson(e))
         .toList();
   }
@@ -58,6 +63,13 @@ class NoteService extends GetxService {
       if (isPinned != null) "isPinned": isPinned,
       if (isArchived != null) "isArchived": isArchived,
       if (isLocked != null) "isLocked": isLocked,
+    });
+  }
+
+  Future<void> deleteRestoreNote(int id, bool isDelete) async {
+    await _api.dio.post("/api/note/delete-restore", data: {
+      "id": id,
+      "isDelete": isDelete,
     });
   }
 

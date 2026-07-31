@@ -5,12 +5,12 @@ import '../../data/models/folder_model.dart';
 import '../../data/services/note_service.dart';
 import '../../data/services/folder_service.dart';
 
-class RecentlyDeletedController extends GetxController {
+class TrashController extends GetxController {
   final _noteService = Get.find<NoteService>();
   final _folderService = Get.find<FolderService>();
   
-  final deletedNotes = <NoteModel>[].obs;
-  final deletedFolders = <FolderModel>[].obs;
+  final trashNotes = <NoteModel>[].obs;
+  final trashFolders = <FolderModel>[].obs;
   final isLoading = true.obs;
   final isEditing = false.obs;
   final selectedNoteIds = <int>{}.obs;
@@ -19,13 +19,13 @@ class RecentlyDeletedController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchDeletedItems();
+    fetchTrashItems();
   }
 
   @override
   void onReady() {
     super.onReady();
-    fetchDeletedItems(); // Re-fetch when user returns to screen
+    fetchTrashItems();
   }
 
   void toggleEditing() {
@@ -52,37 +52,32 @@ class RecentlyDeletedController extends GetxController {
     }
   }
 
-  Future<void> fetchDeletedItems() async {
+  Future<void> fetchTrashItems() async {
     isLoading.value = true;
     try {
-      // 1. Fetch Trash Notes
-      final noteResponse = await _noteService.getTrashNotes();
-      
-      // 2. Fetch All Folders (which includes the trash list)
-      final folderRes = await _folderService.getFolders();
-      
-      // Clear current lists
-      deletedNotes.clear();
-      deletedFolders.clear();
+      final results = await Future.wait([
+        _noteService.getTrashNotes(),
+        _folderService.getFolders(),
+      ]);
 
-      // Map Note Models
-      deletedNotes.assignAll(noteResponse);
-
-      // Map Folder Models from the trash list
-      final List<FolderModel> folders = (folderRes.trash as List).map((e) {
-        if (e is Map<String, dynamic>) {
-          return FolderModel.fromJson(e);
-        }
-        return FolderModel(id: 0, name: "Unknown Folder", iconName: "folder", colorValue: "0xFFFFCC00", sortOrder: 0);
-      }).toList();
+      final List<NoteModel> notes = results[0] as List<NoteModel>;
+      final folderRes = results[1] as FolderResponse;
       
-      deletedFolders.assignAll(folders);
+      final List<FolderModel> folders = (folderRes.trash as List)
+          .map((e) {
+            if (e is Map<String, dynamic>) {
+              return FolderModel.fromJson(e);
+            }
+            return FolderModel(id: e as int, name: "Deleted Folder", iconName: "folder", colorValue: "0xFFFFCC00", sortOrder: 0);
+          })
+          .toList();
 
-      debugPrint("SUCCESS: Fetched ${deletedNotes.length} notes and ${deletedFolders.length} folders in trash.");
-    } catch (e, stack) {
-      debugPrint("ERROR in fetchDeletedItems: $e");
-      debugPrint(stack.toString());
-      Get.snackbar("Error", "Could not load deleted items");
+      trashNotes.assignAll(notes);
+      trashFolders.assignAll(folders);
+      
+      debugPrint("TRASH: Found ${trashNotes.length} notes and ${trashFolders.length} folders.");
+    } catch (e) {
+      Get.snackbar("Error", "Could not load trash items");
     } finally {
       isLoading.value = false;
     }
@@ -90,11 +85,9 @@ class RecentlyDeletedController extends GetxController {
 
   Future<void> recoverSelectedItems() async {
     try {
-      // Recover notes
       for (final id in selectedNoteIds) {
         await _noteService.deleteRestoreNote(id, false);
       }
-      // Recover folders
       for (final id in selectedFolderIds) {
         await _folderService.deleteRestoreFolder(id, false);
       }
@@ -102,15 +95,14 @@ class RecentlyDeletedController extends GetxController {
       selectedNoteIds.clear();
       selectedFolderIds.clear();
       isEditing.value = false;
-      await fetchDeletedItems();
+      await fetchTrashItems();
       Get.snackbar("Success", "Items recovered", snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar("Error", "Could not recover items");
     }
   }
 
-  Future<void> deletePermanentlySelectedItems() async {
-    // API logic for permanent delete would go here
+  Future<void> deletePermanently() async {
     Get.snackbar("Info", "Permanent delete coming soon");
   }
 }
