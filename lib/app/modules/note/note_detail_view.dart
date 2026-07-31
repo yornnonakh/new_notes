@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 import '../../data/models/note_model.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/glass_widgets.dart';
 import 'note_controller.dart';
 
 class NoteDetailView extends GetView<NoteController> {
@@ -58,151 +57,114 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _buildTopBar(BuildContext context) {
-    final controlSize = _scaledControlSize(context);
-    final groupedControlWidth = controlSize * 2.12;
+    final controlSize = 40.0;
 
     return _pageContent(
       Padding(
-        padding: EdgeInsets.fromLTRB(
-          _topBarInset(context),
-          0,
-          _topBarInset(context),
-          0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
           height: controlSize,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _glassControl(
-                context,
-                key: const ValueKey('note-back-button'),
-                width: controlSize,
-                height: controlSize,
-                borderRadius: controlSize / 2,
-                label: 'Back',
+              // Left: Back button in white circular container
+              GestureDetector(
                 onTap: Get.back,
-                child: Icon(
-                  CupertinoIcons.back,
-                  color: _controlColor(context),
-                  size: 27,
+                child: Container(
+                  width: controlSize,
+                  height: controlSize,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    CupertinoIcons.chevron_left,
+                    color: _controlColor(context),
+                    size: 22,
+                  ),
                 ),
               ),
-              const Spacer(),
-              _glassControl(
-                context,
-                key: const ValueKey('note-undo-button'),
-                width: controlSize,
-                height: controlSize,
-                borderRadius: controlSize / 2,
-                label: 'Undo',
-                onTap: () {},
-                child: Icon(
-                  CupertinoIcons.arrow_uturn_left,
-                  color: _controlColor(context),
-                  size: 25,
-                ),
+
+              // Right: Undo button + Share & More pill container
+              Row(
+                children: [
+                  // Undo circular button
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      width: controlSize,
+                      height: controlSize,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        CupertinoIcons.arrow_counterclockwise,
+                        color: _controlColor(context),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // Share + Ellipsis pill container
+                  Container(
+                    height: controlSize,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                          onPressed: () {},
+                          icon: Icon(
+                            CupertinoIcons.share,
+                            color: _controlColor(context),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                          onPressed: () {},
+                          icon: Icon(
+                            CupertinoIcons.ellipsis,
+                            color: _controlColor(context),
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              _buildShareAndMoreControl(
-                context,
-                width: groupedControlWidth,
-                height: controlSize,
-              ),
-              const SizedBox(width: 8),
-              _saveButton(context, size: controlSize),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShareAndMoreControl(
-    BuildContext context, {
-    required double width,
-    required double height,
-  }) {
-    return DecoratedBox(
-      decoration: _glassShadow(context, height / 2),
-      child: LiquidGlassContainer(
-        width: width,
-        height: height,
-        borderRadius: height / 2,
-        opacity: 0.9,
-        child: Row(
-          children: [
-            Expanded(
-              child: _toolbarTapTarget(
-                key: const ValueKey('note-share-button'),
-                label: 'Share note',
-                onTap: () {},
-                borderRadius: BorderRadius.horizontal(
-                  left: Radius.circular(height / 2),
-                ),
-                child: Icon(
-                  CupertinoIcons.share,
-                  color: _controlColor(context),
-                  size: 24,
-                ),
-              ),
-            ),
-            Expanded(
-              child: _toolbarTapTarget(
-                key: const ValueKey('note-more-button'),
-                label: 'More note options',
-                onTap: () {},
-                borderRadius: BorderRadius.horizontal(
-                  right: Radius.circular(height / 2),
-                ),
-                child: Icon(
-                  CupertinoIcons.ellipsis,
-                  color: _controlColor(context),
-                  size: 25,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _saveButton(BuildContext context, {required double size}) {
-    return Semantics(
-      key: const ValueKey('note-save-button'),
-      button: true,
-      label: 'Save note',
-      onTap: controller.saveNote,
-      excludeSemantics: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppTheme.folderYellow,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.folderYellow.withValues(alpha: 0.2),
-              blurRadius: 18,
-              offset: const Offset(0, 7),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: controller.saveNote,
-            excludeFromSemantics: true,
-            child: SizedBox.square(
-              dimension: size,
-              child: const Center(
-                child: Icon(
-                  CupertinoIcons.check_mark,
-                  color: Colors.white,
-                  size: 27,
-                ),
-              ),
-            ),
           ),
         ),
       ),
@@ -418,15 +380,19 @@ class NoteDetailView extends GetView<NoteController> {
         : 'Attachment: ${block.displayName}';
 
     return Padding(
-      padding: const EdgeInsets.only(top: 4, bottom: 14),
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Semantics(
           image: true,
           label: semanticsLabel,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: SizedBox(width: 60, height: 82, child: attachment),
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 150,
+              height: 200,
+              child: attachment,
+            ),
           ),
         ),
       ),
@@ -471,196 +437,103 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _buildEditingToolbar(BuildContext context) {
-    final toolbarHeight = _scaledToolbarHeight(context);
+    const controlHeight = 50.0;
 
     return ColoredBox(
       color: _backgroundColor(context),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.only(bottom: 10),
+        minimum: const EdgeInsets.only(bottom: 12),
         child: _pageContent(
           Padding(
-            padding: EdgeInsets.fromLTRB(
-              _toolbarInset(context),
-              6,
-              _toolbarInset(context),
-              0,
-            ),
-            child: DecoratedBox(
-              decoration: _glassShadow(context, toolbarHeight / 2),
-              child: LiquidGlassContainer(
-                height: toolbarHeight,
-                borderRadius: toolbarHeight / 2,
-                opacity: 0.92,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('add-text-block-button'),
-                        label: 'Add text block',
-                        onTap: controller.addTextBlock,
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.circular(toolbarHeight / 2),
-                        ),
-                        child: Text(
-                          'Aa',
-                          style: TextStyle(
-                            color: _controlColor(context),
-                            fontFamily: _displayFont,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -0.7,
-                            height: 1,
-                          ),
-                        ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Left Floating Pill (Checklist, Attachment, Drawing)
+                Container(
+                  height: controlHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('add-checklist-button'),
-                        label: 'Add checklist',
-                        onTap: controller.addChecklistBlock,
-                        child: Icon(
-                          CupertinoIcons.check_mark_circled,
-                          color: _controlColor(context),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                        onPressed: controller.addChecklistBlock,
+                        icon: const Icon(
+                          Icons.checklist_rtl_rounded,
+                          color: AppTheme.textPrimary,
                           size: 24,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('add-table-button'),
-                        label: 'Add table',
-                        onTap: () {},
-                        child: Icon(
-                          CupertinoIcons.table,
-                          color: _controlColor(context),
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('add-attachment-button'),
-                        label: 'Add attachment',
-                        onTap: () {},
-                        child: Icon(
+                      const SizedBox(width: 4),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                        onPressed: () {},
+                        icon: const Icon(
                           CupertinoIcons.paperclip,
-                          color: _controlColor(context),
-                          size: 26,
+                          color: AppTheme.textPrimary,
+                          size: 22,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('drawing-button'),
-                        label: 'Drawing tools',
-                        onTap: () {},
-                        child: Icon(
-                          CupertinoIcons.pencil_circle,
-                          color: _controlColor(context),
-                          size: 25,
+                      const SizedBox(width: 4),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                        onPressed: () {},
+                        icon: const Icon(
+                          CupertinoIcons.pencil_outline,
+                          color: AppTheme.textPrimary,
+                          size: 22,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _toolbarTapTarget(
-                        key: const ValueKey('camera-button'),
-                        label: 'Add photo or video',
-                        onTap: () {},
-                        borderRadius: BorderRadius.horizontal(
-                          right: Radius.circular(toolbarHeight / 2),
-                        ),
-                        child: Icon(
-                          CupertinoIcons.camera,
-                          color: _controlColor(context),
-                          size: 25,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+
+                // Right Floating Circle (New note / Edit button)
+                GestureDetector(
+                  onTap: controller.saveNote,
+                  child: Container(
+                    width: controlHeight,
+                    height: controlHeight,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        CupertinoIcons.square_pencil,
+                        color: AppTheme.textPrimary,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _glassControl(
-    BuildContext context, {
-    Key? key,
-    required double width,
-    required double height,
-    required double borderRadius,
-    required String label,
-    required VoidCallback onTap,
-    required Widget child,
-  }) {
-    return Semantics(
-      key: key,
-      button: true,
-      label: label,
-      onTap: onTap,
-      excludeSemantics: true,
-      child: DecoratedBox(
-        decoration: _glassShadow(context, borderRadius),
-        child: LiquidGlassContainer(
-          width: width,
-          height: height,
-          borderRadius: borderRadius,
-          opacity: 0.9,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              excludeFromSemantics: true,
-              child: Center(child: child),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _toolbarTapTarget({
-    Key? key,
-    required String label,
-    required VoidCallback onTap,
-    required Widget child,
-    BorderRadius borderRadius = BorderRadius.zero,
-  }) {
-    return Semantics(
-      key: key,
-      button: true,
-      label: label,
-      onTap: onTap,
-      excludeSemantics: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: borderRadius,
-          onTap: onTap,
-          excludeFromSemantics: true,
-          child: Center(child: child),
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration _glassShadow(BuildContext context, double borderRadius) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(borderRadius),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-          blurRadius: 24,
-          offset: const Offset(0, 9),
-        ),
-      ],
     );
   }
 
@@ -675,28 +548,8 @@ class NoteDetailView extends GetView<NoteController> {
     );
   }
 
-  double _topBarInset(BuildContext context) {
-    return (MediaQuery.sizeOf(context).width * 0.045).clamp(14.0, 22.0);
-  }
-
   double _editorInset(BuildContext context) {
     return (MediaQuery.sizeOf(context).width * 0.065).clamp(21.0, 32.0);
-  }
-
-  double _toolbarInset(BuildContext context) {
-    return (MediaQuery.sizeOf(context).width * 0.035).clamp(12.0, 20.0);
-  }
-
-  double _scaledControlSize(BuildContext context) {
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final growth = (scale - 1).clamp(0.0, 1.0);
-    return 44 + (growth * 8);
-  }
-
-  double _scaledToolbarHeight(BuildContext context) {
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final growth = (scale - 1).clamp(0.0, 1.0);
-    return 44 + (growth * 12);
   }
 
   bool _isDark(BuildContext context) {
