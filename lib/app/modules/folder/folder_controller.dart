@@ -37,7 +37,7 @@ class FolderController extends GetxController {
   void toggleEditing() => isEditing.value = !isEditing.value;
 
   bool isSystemFolder(FolderModel folder) {
-    final systemNames = ["All on My iPhone", "Notes", "Recently Deleted"];
+    final systemNames = ["All on My iPhone", "Notes", "Recently Deleted", "Profile"];
     return systemNames.contains(folder.name);
   }
 
