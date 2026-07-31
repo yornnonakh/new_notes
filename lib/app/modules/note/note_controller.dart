@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/note_model.dart';
+import '../../data/services/folder_service.dart';
 import '../../data/services/note_service.dart';
+import '../../theme/app_theme.dart';
 
 class NoteController extends GetxController {
   final _noteService = Get.find<NoteService>();
 
   final notes = <NoteModel>[].obs;
   final isLoading = true.obs;
+
+  // Edit and selection mode for list view
+  final isEditing = false.obs;
+  final selectedNoteIds = <int>{}.obs;
   
   // For Detail View
   final currentNote = Rxn<NoteModel>();
@@ -16,6 +22,135 @@ class NoteController extends GetxController {
   
   // Map to keep track of text controllers for each block to prevent focus loss
   final Map<String, TextEditingController> blockControllers = {};
+
+  void toggleEditing() {
+    isEditing.value = !isEditing.value;
+    if (!isEditing.value) {
+      selectedNoteIds.clear();
+    }
+  }
+
+  void toggleSelectNote(int id) {
+    if (selectedNoteIds.contains(id)) {
+      selectedNoteIds.remove(id);
+    } else {
+      selectedNoteIds.add(id);
+    }
+  }
+
+  Future<void> deleteSelectedNotes(int folderId) async {
+    final targets = selectedNoteIds.isNotEmpty
+        ? selectedNoteIds.toList()
+        : notes.map((n) => n.id).toList();
+
+    if (targets.isEmpty) return;
+
+    try {
+      for (final id in targets) {
+        await _noteService.updateNoteState(id, isArchived: true);
+      }
+      selectedNoteIds.clear();
+      isEditing.value = false;
+      await fetchNotes(folderId: folderId);
+      Get.snackbar("Success", "Notes moved to Recently Deleted",
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar("Error", "Could not delete notes");
+    }
+  }
+
+  Future<void> moveSelectedNotes(BuildContext context, int currentFolderId) async {
+    final targets = selectedNoteIds.isNotEmpty
+        ? selectedNoteIds.toList()
+        : notes.map((n) => n.id).toList();
+
+    if (targets.isEmpty) return;
+
+    try {
+      final folderRes = await Get.find<FolderService>().getFolders();
+      final allFolders = folderRes.folders;
+
+      if (allFolders.isEmpty) {
+        Get.snackbar("Info", "No destination folders available");
+        return;
+      }
+
+      Get.bottomSheet(
+        Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Move to Folder",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: allFolders.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (ctx, idx) {
+                    final folder = allFolders[idx];
+                    final isCurrent = folder.id == currentFolderId;
+                    return ListTile(
+                      leading: Icon(
+                        folder.icon,
+                        color: folder.color,
+                      ),
+                      title: Text(folder.name),
+                      trailing: isCurrent
+                          ? const Icon(Icons.check, color: AppTheme.folderYellow)
+                          : null,
+                      onTap: isCurrent
+                          ? null
+                          : () async {
+                              Get.back();
+                              try {
+                                for (final noteId in targets) {
+                                  final note = notes.firstWhereOrNull((n) => n.id == noteId);
+                                  if (note != null) {
+                                    await _noteService.saveNote(
+                                      folder.id,
+                                      note.title,
+                                      noteId: note.id,
+                                    );
+                                  }
+                                }
+                                selectedNoteIds.clear();
+                                isEditing.value = false;
+                                await fetchNotes(folderId: currentFolderId);
+                                Get.snackbar(
+                                  "Success",
+                                  "Moved notes to ${folder.name}",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              } catch (e) {
+                                Get.snackbar("Error", "Failed to move notes");
+                              }
+                            },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      Get.snackbar("Error", "Could not fetch folders");
+    }
+  }
 
   @override
   void onInit() {

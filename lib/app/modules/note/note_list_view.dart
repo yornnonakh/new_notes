@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:new_note/app/widgets/glass_widgets.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/models/note_model.dart';
 import '../../routes/app_pages.dart';
@@ -24,23 +25,91 @@ class NoteListView extends GetView<NoteController> {
             // Top App Bar Actions
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.chevron_left, color: AppTheme.folderYellow, size: 36),
-                    ),
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.folderYellow, width: 1.5),
+                    LiquidGlassContainer(
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(
+                          Icons.chevron_left,
+                          color: AppTheme.folderYellow,
+                          size: 36,
+                        ),
                       ),
-                      child: const Icon(Icons.more_horiz, color: AppTheme.folderYellow, size: 18),
                     ),
+                    Obx(() {
+                      if (controller.isEditing.value) {
+                        return GestureDetector(
+                          onTap: controller.toggleEditing,
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              color: AppTheme.textPrimary,
+                              size: 20,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            controller.toggleEditing();
+                          }
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle_outline, color: AppTheme.textPrimary, size: 20),
+                                SizedBox(width: 12),
+                                Text("Select Notes", style: TextStyle(color: AppTheme.textPrimary)),
+                              ],
+                            ),
+                          ),
+                        ],
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.folderYellow,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: LiquidGlassContainer(
+                            child: const Icon(
+                              Icons.more_horiz,
+                              color: AppTheme.textSecondary,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -55,12 +124,22 @@ class NoteListView extends GetView<NoteController> {
                   children: [
                     Text(
                       folder.name,
-                      style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      style: const TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
-                    Obx(() => Text(
-                      "${controller.notes.length} Notes",
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textGrey, fontWeight: FontWeight.w400),
-                    )),
+                    Obx(
+                      () => Text(
+                        "${controller.notes.length} Notes",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textGrey,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -69,104 +148,256 @@ class NoteListView extends GetView<NoteController> {
             Obx(() {
               if (controller.isLoading.value) {
                 return const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator(color: AppTheme.folderYellow)),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppTheme.folderYellow,
+                    ),
+                  ),
                 );
               }
-              
+
               if (controller.notes.isEmpty) {
                 return const SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
-                    child: Text("No Notes", style: TextStyle(color: AppTheme.textGrey, fontSize: 18)),
+                    child: Text(
+                      "No Notes",
+                      style: TextStyle(color: AppTheme.textGrey, fontSize: 18),
+                    ),
                   ),
                 );
               }
 
               final groupedNotes = _groupNotesByDate(controller.notes);
-              
+
               return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final section = groupedNotes.keys.elementAt(index);
-                    final sectionNotes = groupedNotes[section]!;
-                    
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8, bottom: 8),
-                            child: Text(section, 
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.textPrimary)),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final section = groupedNotes.keys.elementAt(index);
+                  final sectionNotes = groupedNotes[section]!;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, bottom: 8),
+                          child: Text(
+                            section,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: AppTheme.textPrimary,
                             ),
-                            child: Column(
-                              children: [
-                                for (int i = 0; i < sectionNotes.length; i++) ...[
-                                  _buildNoteTile(sectionNotes[i], folder.id),
-                                  if (i < sectionNotes.length - 1)
-                                    const Divider(indent: 16, height: 1),
-                                ],
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            children: [
+                              for (int i = 0; i < sectionNotes.length; i++) ...[
+                                _buildNoteTile(sectionNotes[i], folder.id),
+                                if (i < sectionNotes.length - 1)
+                                  const Divider(indent: 16, height: 1),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: groupedNotes.length,
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                }, childCount: groupedNotes.length),
               );
             }),
-            
+
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(folder),
+      bottomNavigationBar: Obx(() {
+        if (controller.isEditing.value) {
+          return _buildEditBottomBar(folder);
+        }
+        return _buildBottomBar(folder);
+      }),
     );
   }
 
   Widget _buildNoteTile(NoteModel note, int folderId) {
-    final attachment = note.content.firstWhereOrNull((b) => b is AttachmentBlock) as AttachmentBlock?;
-    
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      onTap: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"noteId": note.id})
-          ?.then((value) => controller.fetchNotes(folderId: folderId)),
-      title: Text(
-        note.title.isEmpty ? "New Note" : note.title,
-        style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 17),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 2),
-        child: Text(
-          "${_formatTime(note.updatedAt)}  ${_getContentSnippet(note)}",
-          style: const TextStyle(color: AppTheme.textGrey, fontSize: 15),
+    final attachment =
+        note.content.firstWhereOrNull((b) => b is AttachmentBlock)
+            as AttachmentBlock?;
+
+    return Obx(() {
+      final isEditing = controller.isEditing.value;
+      final isSelected = controller.selectedNoteIds.contains(note.id);
+
+      return ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        onTap: () {
+          if (isEditing) {
+            controller.toggleSelectNote(note.id);
+          } else {
+            Get.toNamed(
+              Routes.NOTE_DETAIL,
+              arguments: {"noteId": note.id},
+            )?.then((value) => controller.fetchNotes(folderId: folderId));
+          }
+        },
+        leading: isEditing
+            ? Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? AppTheme.textPrimary : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? AppTheme.textPrimary : Colors.grey.shade400,
+                    width: 1.5,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 14,
+                      )
+                    : null,
+              )
+            : null,
+        title: Text(
+          note.title.isEmpty ? "New Note" : note.title,
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-      ),
-      trailing: attachment != null ? Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          image: DecorationImage(
-            image: attachment.url != null 
-              ? NetworkImage(attachment.url!) 
-              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
-            fit: BoxFit.cover,
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            "${_formatTime(note.updatedAt)}  ${_getContentSnippet(note)}",
+            style: const TextStyle(color: AppTheme.textGrey, fontSize: 15),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ) : const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+        trailing: attachment != null
+            ? Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: attachment.url != null
+                        ? NetworkImage(attachment.url!)
+                        : const AssetImage('assets/images/placeholder.png')
+                              as ImageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+            : (isEditing
+                ? null
+                : const Icon(
+                    Icons.chevron_right,
+                    color: AppTheme.dividerColor,
+                    size: 20,
+                  )),
+      );
+    });
+  }
+
+  Widget _buildEditBottomBar(FolderModel folder) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Obx(() {
+          final selectedCount = controller.selectedNoteIds.length;
+          final moveText = selectedCount == 0
+              ? "Move All"
+              : selectedCount == 1
+                  ? "Move"
+                  : "Move ($selectedCount)";
+          final deleteText = selectedCount == 0
+              ? "Delete All"
+              : selectedCount == 1
+                  ? "Delete"
+                  : "Delete ($selectedCount)";
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Builder(
+                builder: (context) => GestureDetector(
+                  onTap: () => controller.moveSelectedNotes(context, folder.id),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      moveText,
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => controller.deleteSelectedNotes(folder.id),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    deleteText,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
     );
   }
 
@@ -195,10 +426,20 @@ class NoteListView extends GetView<NoteController> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: AppTheme.textGrey, size: 22),
+                      const Icon(
+                        Icons.search,
+                        color: AppTheme.textGrey,
+                        size: 22,
+                      ),
                       const SizedBox(width: 8),
                       const Expanded(
-                        child: Text("Search", style: TextStyle(color: AppTheme.textGrey, fontSize: 17)),
+                        child: Text(
+                          "Search",
+                          style: TextStyle(
+                            color: AppTheme.textGrey,
+                            fontSize: 17,
+                          ),
+                        ),
                       ),
                       const Icon(Icons.mic, color: AppTheme.textGrey, size: 22),
                     ],
@@ -208,9 +449,15 @@ class NoteListView extends GetView<NoteController> {
             ),
             const SizedBox(width: 16),
             IconButton(
-              onPressed: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"folderId": folder.id, "noteId": 0})
-                  ?.then((value) => controller.fetchNotes(folderId: folder.id)),
-              icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 32),
+              onPressed: () => Get.toNamed(
+                Routes.NOTE_DETAIL,
+                arguments: {"folderId": folder.id, "noteId": 0},
+              )?.then((value) => controller.fetchNotes(folderId: folder.id)),
+              icon: const Icon(
+                Icons.open_in_new,
+                color: AppTheme.textPrimary,
+                size: 32,
+              ),
             ),
           ],
         ),
@@ -228,7 +475,7 @@ class NoteListView extends GetView<NoteController> {
     for (var note in notes) {
       final date = note.updatedAt ?? now;
       final noteDate = DateTime(date.year, date.month, date.day);
-      
+
       String key;
       if (noteDate == today) {
         key = "Today";
@@ -249,7 +496,9 @@ class NoteListView extends GetView<NoteController> {
   String _formatTime(DateTime? date) {
     if (date == null) return "";
     final now = DateTime.now();
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
       return DateFormat('HH:mm').format(date);
     }
     return DateFormat('EEEE').format(date); // e.g. Tuesday
@@ -257,7 +506,8 @@ class NoteListView extends GetView<NoteController> {
 
   String _getContentSnippet(NoteModel note) {
     if (note.content.isEmpty) return "No additional text";
-    final firstBlock = note.content.firstWhereOrNull((b) => b is TextBlock) as TextBlock?;
+    final firstBlock =
+        note.content.firstWhereOrNull((b) => b is TextBlock) as TextBlock?;
     if (firstBlock != null) return firstBlock.text;
     return "Attachment/Checklist";
   }

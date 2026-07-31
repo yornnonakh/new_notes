@@ -56,28 +56,54 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
                         ),
                       ),
                       Obx(
-                        () => _glassControl(
-                          context,
-                          key: const ValueKey('recently-deleted-edit-button'),
-                          width: editControlWidth,
-                          height: topControlHeight,
-                          borderRadius: topControlHeight / 2,
-                          label: controller.isEditing.value
-                              ? 'Finish editing deleted notes'
-                              : 'Edit deleted notes',
-                          onTap: controller.toggleEditing,
-                          child: Text(
-                            controller.isEditing.value ? 'Done' : 'Edit',
-                            style: TextStyle(
-                              color: _controlColor(context),
-                              fontFamily: _textFont,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: -0.25,
-                              height: 1,
+                        () {
+                          if (controller.isEditing.value) {
+                            return GestureDetector(
+                              onTap: controller.toggleEditing,
+                              child: Container(
+                                width: topControlHeight,
+                                height: topControlHeight,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  CupertinoIcons.checkmark,
+                                  color: _primaryTextColor(context),
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          }
+
+                          return _glassControl(
+                            context,
+                            key: const ValueKey('recently-deleted-edit-button'),
+                            width: editControlWidth,
+                            height: topControlHeight,
+                            borderRadius: topControlHeight / 2,
+                            label: 'Edit deleted notes',
+                            onTap: controller.toggleEditing,
+                            child: Text(
+                              'Edit',
+                              style: TextStyle(
+                                color: _controlColor(context),
+                                fontFamily: _textFont,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: -0.25,
+                                height: 1,
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -229,7 +255,12 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
+      bottomNavigationBar: Obx(() {
+        if (controller.isEditing.value) {
+          return _buildEditBottomBar(context);
+        }
+        return _buildBottomBar(context);
+      }),
     );
   }
 
@@ -238,54 +269,165 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
     final title = note.title.trim().isEmpty ? 'New Note' : note.title.trim();
     final subtitle = _noteSubtitle(note, attachmentCount);
 
-    return Semantics(
-      container: true,
-      label: '$title, $subtitle',
-      excludeSemantics: true,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 55),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(26, 8, 18, 8),
-          child: Row(
+    return Obx(() {
+      final isEditing = controller.isEditing.value;
+      final isSelected = controller.selectedNoteIds.contains(note.id);
+
+      return GestureDetector(
+        onTap: isEditing ? () => controller.toggleSelectNote(note.id) : null,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 55),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+            child: Row(
+              children: [
+                if (isEditing) ...[
+                  Container(
+                    width: 22,
+                    height: 22,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected ? AppTheme.textPrimary : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected ? AppTheme.textPrimary : Colors.grey.shade400,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: isSelected
+                        ? const Icon(
+                            CupertinoIcons.checkmark,
+                            color: Colors.white,
+                            size: 13,
+                          )
+                        : null,
+                  ),
+                ],
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: _primaryTextColor(context),
+                          fontFamily: _textFont,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.3,
+                          height: 1.12,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: _secondaryTextColor(context),
+                          fontFamily: _textFont,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -0.15,
+                          height: 1.12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildEditBottomBar(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Obx(() {
+          final selectedCount = controller.selectedNoteIds.length;
+          final recoverText = selectedCount == 0
+              ? "Move All"
+              : selectedCount == 1
+                  ? "Recover"
+                  : "Recover ($selectedCount)";
+          final deleteText = selectedCount == 0
+              ? "Delete All"
+              : selectedCount == 1
+                  ? "Delete"
+                  : "Delete ($selectedCount)";
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: _primaryTextColor(context),
-                        fontFamily: _textFont,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.3,
-                        height: 1.12,
+              GestureDetector(
+                onTap: controller.recoverSelectedNotes,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
+                    ],
+                  ),
+                  child: Text(
+                    recoverText,
+                    style: TextStyle(
+                      color: _primaryTextColor(context),
+                      fontFamily: _textFont,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: _secondaryTextColor(context),
-                        fontFamily: _textFont,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: -0.15,
-                        height: 1.12,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: controller.deletePermanentlySelectedNotes,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
+                    ],
+                  ),
+                  child: Text(
+                    deleteText,
+                    style: TextStyle(
+                      color: _primaryTextColor(context),
+                      fontFamily: _textFont,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
