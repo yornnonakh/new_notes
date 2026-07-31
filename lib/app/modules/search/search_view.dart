@@ -84,68 +84,70 @@ class SearchView extends GetView<sc.SearchController> {
   }
 
   Widget _buildSearchResults() {
-    if (controller.noteResults.isEmpty && controller.folderResults.isEmpty) {
-      return const Center(
-        child: Text(
-          "No results found",
-          style: TextStyle(color: AppTheme.textGrey),
-        ),
-      );
-    }
+    return Obx(() {
+      if (controller.noteResults.isEmpty && controller.folderResults.isEmpty) {
+        return const Center(
+          child: Text(
+            "No results found",
+            style: TextStyle(color: AppTheme.textGrey),
+          ),
+        );
+      }
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        if (controller.folderResults.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.only(left: 8, bottom: 12),
-            child: Text("Folders", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ),
-          Container(
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-            child: Column(
-              children: [
-                for (int i = 0; i < controller.folderResults.length; i++) ...[
-                  ListTile(
-                    onTap: () => Get.toNamed(Routes.NOTE_LIST, arguments: controller.folderResults[i]),
-                    leading: Icon(controller.folderResults[i].icon, color: controller.folderResults[i].color),
-                    title: Text(controller.folderResults[i].name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                    trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                  ),
-                  if (i < controller.folderResults.length - 1)
-                    const Divider(indent: 56, height: 1),
-                ],
-              ],
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (controller.folderResults.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 12),
+              child: Text("Folders", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ),
-          ),
-          const SizedBox(height: 24),
-        ],
-        
-        if (controller.noteResults.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.only(left: 8, bottom: 12),
-            child: Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          ),
-          Container(
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-            child: Column(
-              children: [
-                for (int i = 0; i < controller.noteResults.length; i++) ...[
-                  ListTile(
-                    onTap: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"noteId": controller.noteResults[i].id}),
-                    title: Text(controller.noteResults[i].title.isEmpty ? "New Note" : controller.noteResults[i].title, 
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                    trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                  ),
-                  if (i < controller.noteResults.length - 1)
-                    const Divider(indent: 16, height: 1),
+            Container(
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                children: [
+                  for (int i = 0; i < controller.folderResults.length; i++) ...[
+                    ListTile(
+                      onTap: () => Get.toNamed(Routes.NOTE_LIST, arguments: controller.folderResults[i]),
+                      leading: Icon(controller.folderResults[i].icon, color: controller.folderResults[i].color),
+                      title: Text(controller.folderResults[i].name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                      trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
+                    ),
+                    if (i < controller.folderResults.length - 1)
+                      const Divider(indent: 56, height: 1),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
+            const SizedBox(height: 24),
+          ],
+          
+          if (controller.noteResults.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 12),
+              child: Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
+            Container(
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                children: [
+                  for (int i = 0; i < controller.noteResults.length; i++) ...[
+                    ListTile(
+                      onTap: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"noteId": controller.noteResults[i].id}),
+                      title: Text(controller.noteResults[i].title.isEmpty ? "New Note" : controller.noteResults[i].title, 
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                      trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
+                    ),
+                    if (i < controller.noteResults.length - 1)
+                      const Divider(indent: 16, height: 1),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
-    );
+      );
+    });
   }
 
   Widget _buildBottomBar() {
@@ -222,7 +224,6 @@ class SearchView extends GetView<sc.SearchController> {
   }
 
   Widget _buildBottomSearchBar() {
-    // This is handled by _buildBottomBar, keeping for consistency if called elsewhere
     return _buildBottomBar();
   }
 }

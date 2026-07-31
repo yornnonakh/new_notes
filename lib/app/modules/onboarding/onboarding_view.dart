@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../widgets/glass_widgets.dart';
+import '../../theme/app_theme.dart';
 import 'onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -10,34 +10,9 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.bodyColor,
       body: Stack(
         children: [
-          // Background Gradient Circles for Glass Effect
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.orange.withOpacity(0.3),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.blue.withOpacity(0.2),
-              ),
-            ),
-          ),
-          
           PageView.builder(
             controller: controller.pageController,
             onPageChanged: controller.onPageChanged,
@@ -45,39 +20,53 @@ class OnboardingView extends GetView<OnboardingController> {
             itemBuilder: (context, index) {
               final page = controller.pages[index];
               return Padding(
-                padding: const EdgeInsets.all(40.0),
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    LiquidGlassContainer(
-                      height: 300,
-                      width: 300,
+                    Container(
+                      height: 280,
+                      width: 280,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
                       child: Center(
                         child: Icon(
                           page.icon,
                           size: 100,
-                          color: Colors.white,
-                        ).animate().shake(duration: const Duration(seconds: 1)),
+                          color: AppTheme.folderYellow,
+                        ).animate().shake(duration: GetNumUtils(1).seconds),
                       ),
-                    ),
-                    const SizedBox(height: 50),
+                    ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+                    const SizedBox(height: 60),
                     Text(
                       page.title,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -0.5,
                       ),
-                    ).animate().fadeIn().slideY(begin: 0.5, end: 0),
+                    ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                     const SizedBox(height: 20),
                     Text(
                       page.description,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
+                      style: const TextStyle(
+                        fontSize: 17,
+                        color: AppTheme.textSecondary,
+                        height: 1.5,
                       ),
-                    ).animate().fadeIn(delay: const Duration(milliseconds: 300)),
+                    ).animate().fadeIn(delay: 400.ms),
                   ],
                 ),
               );
@@ -85,23 +74,24 @@ class OnboardingView extends GetView<OnboardingController> {
           ),
           
           Positioned(
-            bottom: 50,
-            left: 20,
-            right: 20,
+            bottom: 60,
+            left: 32,
+            right: 32,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Obx(() => Row(
                   children: List.generate(
                     controller.pages.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.only(right: 5),
-                      width: controller.currentPage.value == index ? 20 : 8,
+                    (index) => AnimatedContainer(
+                      duration: 300.ms,
+                      margin: const EdgeInsets.only(right: 8),
+                      width: controller.currentPage.value == index ? 24 : 8,
                       height: 8,
                       decoration: BoxDecoration(
                         color: controller.currentPage.value == index 
-                            ? Theme.of(context).primaryColor 
-                            : Colors.grey[300],
+                            ? AppTheme.folderYellow 
+                            : AppTheme.textGrey.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -111,9 +101,10 @@ class OnboardingView extends GetView<OnboardingController> {
                 ElevatedButton(
                   onPressed: controller.nextPage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: AppTheme.folderYellow,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -121,7 +112,8 @@ class OnboardingView extends GetView<OnboardingController> {
                   child: Obx(() => Text(
                     controller.currentPage.value == controller.pages.length - 1 
                         ? "Get Started" 
-                        : "Next"
+                        : "Next",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   )),
                 ),
               ],

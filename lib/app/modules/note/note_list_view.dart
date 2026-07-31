@@ -34,11 +34,15 @@ class NoteListView extends GetView<NoteController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.chevron_left, color: AppTheme.folderYellow, size: 36),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                    LiquidGlassContainer(
+                      width: 44,
+                      height: 44,
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.chevron_left, color: AppTheme.textSecondary, size: 36),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
                     Obx(() {
                       if (controller.isEditing.value) {
@@ -61,20 +65,9 @@ class NoteListView extends GetView<NoteController> {
                           NoteContextMenu(controller: controller),
                           barrierColor: Colors.black.withValues(alpha: 0.1),
                         ),
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
+                        child: LiquidGlassContainer(
+                          width: 44,
+                          height: 44,
                           child: const Center(
                             child: Icon(
                               Icons.more_horiz,

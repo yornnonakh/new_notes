@@ -49,7 +49,7 @@ class NoteController extends GetxController {
 
     try {
       for (final id in targets) {
-        await _noteService.updateNoteState(id, isArchived: true);
+        await _noteService.deleteRestoreNote(id, true);
       }
       selectedNoteIds.clear();
       isEditing.value = false;

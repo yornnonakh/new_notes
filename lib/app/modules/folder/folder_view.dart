@@ -171,6 +171,8 @@ class FolderView extends GetView<FolderController> {
           if (includeRecentlyDeleted) ...[
             _buildRecentlyDeletedTile(context),
             const Divider(indent: 56, height: 1),
+            _buildTrashTile(context),
+            const Divider(indent: 56, height: 1),
             _buildProfileTile(context),
           ],
         ],
@@ -289,6 +291,32 @@ class FolderView extends GetView<FolderController> {
             ),
           ),
           title: const Text("Profile", style: TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
+          trailing: const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+        ),
+      );
+    });
+  }
+
+  Widget _buildTrashTile(BuildContext context) {
+    return Obx(() {
+      final isEditing = controller.isEditing.value;
+
+      return Opacity(
+        opacity: isEditing ? 0.15 : 1.0,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          onTap: isEditing ? null : () => Get.toNamed(Routes.TRASH),
+          leading: LiquidGlassContainer(
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            opacity: 0.08,
+            blur: 15,
+            child: const Center(
+              child: Icon(Icons.delete_sweep_rounded, color: Colors.redAccent, size: 20),
+            ),
+          ),
+          title: const Text("Trash", style: TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
           trailing: const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
         ),
       );

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+
 class NoteModel {
   final int id;
   final int folderId;
@@ -22,13 +25,25 @@ class NoteModel {
   });
 
   factory NoteModel.fromJson(Map<String, dynamic> json) {
+    var contentData = json['content'];
+    List<NoteBlock> parsedContent = [];
+    
+    if (contentData is List) {
+      parsedContent = contentData.map((e) => NoteBlock.fromJson(e)).toList();
+    } else if (contentData is String && contentData.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(contentData);
+        if (decoded is List) {
+          parsedContent = decoded.map((e) => NoteBlock.fromJson(e)).toList();
+        }
+      } catch (_) {}
+    }
+
     return NoteModel(
       id: json['NoteId'] ?? json['id'] ?? 0,
       folderId: json['FolderId'] ?? json['folderId'] ?? 0,
       title: json['Title'] ?? json['title'] ?? '',
-      content: (json['content'] as List? ?? [])
-          .map((e) => NoteBlock.fromJson(e))
-          .toList(),
+      content: parsedContent,
       isPinned: json['IsPinned'] ?? json['isPinned'] ?? false,
       isArchived: json['IsArchived'] ?? json['isArchived'] ?? false,
       isLocked: json['IsLocked'] ?? json['isLocked'] ?? false,

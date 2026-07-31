@@ -17,6 +17,8 @@ import '../modules/profile/profile_view.dart';
 import '../modules/profile/profile_binding.dart';
 import '../modules/recently_deleted/recently_deleted_view.dart';
 import '../modules/recently_deleted/recently_deleted_binding.dart';
+import '../modules/trash/trash_view.dart';
+import '../modules/trash/trash_binding.dart';
 
 part 'app_routes.dart';
 
@@ -73,6 +75,11 @@ class AppPages {
       name: Routes.RECENTLY_DELETED,
       page: () => const RecentlyDeletedView(),
       binding: RecentlyDeletedBinding(),
+    ),
+    GetPage(
+      name: Routes.TRASH,
+      page: () => const TrashView(),
+      binding: TrashBinding(),
     ),
   ];
 }
