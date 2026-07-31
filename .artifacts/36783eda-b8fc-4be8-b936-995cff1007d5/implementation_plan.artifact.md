@@ -1,34 +1,37 @@
-# Implementation Plan - iOS Folder UI & Profile Integration
+# Implementation Plan - iOS Note List Context Menu
 
-Update the Folders screen to perfectly match the iOS Notes aesthetic and integrate the Profile entry into the folder list.
+Implement the high-fidelity iOS floating context menu for the Note List view, providing advanced management tools with a premium glass aesthetic.
 
 ## Proposed Changes
 
-### Folder Module Refinement
-#### [MODIFY] [folder_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/folder/folder_view.dart)
-- **Top Actions**:
-    - Ensure "Edit" text button transitions to the yellow circular checkmark in edit mode.
-    - Match the "New Folder" icon (`Icons.create_new_folder_outlined`) and spacing.
-- **Folder List (Edit Mode Fidelity)**:
-    - System folders ("All on My iPhone", "Notes", "Recently Deleted") will be dimmed to 15% opacity and disabled when `isEditing` is true.
-    - User folders will show the yellow circular more icon (`Icons.more_horiz` in a circle) and the reorder handle.
-- **Profile Integration**:
-    - Add a "Profile" tile at the bottom of the "On My iPhone" card group.
-    - Use a person icon (`Icons.person_outline`) and navigate to the Profile screen on tap.
-    - Ensure it also dims during edit mode as it's a system-level navigation.
-- **Bottom Bar**:
-    - Refine the floating rounded search bar with microphone.
-    - Use the `Icons.open_in_new` (or similar iOS-style compose icon) on the far right.
+### Note Module Refinement
+#### [MODIFY] [note_controller.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/note/note_controller.dart)
+- Add stubs for new management features:
+    - `toggleViewMode()` (List vs Gallery)
+    - `updateSorting(String criteria)`
+    - `toggleDateGrouping()`
+    - `viewAllAttachments()`
 
-#### [MODIFY] [folder_controller.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/folder/folder_controller.dart)
-- Update `isSystemFolder` to include the "Profile" entry to ensure correct edit-mode behavior.
+#### [MODIFY] [note_list_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/note/note_list_view.dart)
+- Replace the current `PopupMenuButton` with a custom gesture detector that triggers the new `NoteContextMenu`.
+- Ensure the "more" button visual perfectly matches the iOS circular white button.
+
+### UI Components
+#### [NEW] [NoteContextMenu](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/note/widgets/note_context_menu.dart)
+- **Styling**:
+    - High-blur `BackdropFilter` with a semi-transparent white background.
+    - Large border radius (16) and subtle outer shadow.
+- **Menu Items**:
+    - **View as Gallery**: `Icons.grid_view_rounded`
+    - **Select Notes**: `Icons.check_circle_outline`
+    - **Sort By**: `Icons.swap_vert_rounded` with "Default (Date Edited)" subtitle and chevron.
+    - **Group By Date**: `Icons.calendar_view_day_rounded` with "Default (On)" subtitle and chevron.
+    - **View Attachments**: `Icons.attach_file_rounded`
 
 ## Verification Plan
 
 ### Manual Verification
-- **Visual Check**: Open the folder list and verify it matches the provided screenshot (padding, typography, colors).
-- **Edit Mode**: Toggle edit mode and verify:
-    - The header button changes correctly.
-    - System folders (and Profile) are faded.
-    - Custom folders show the management icons.
-- **Profile Tap**: Verify tapping the new Profile entry navigates to the Profile screen.
+- **Visual Match**: Verify the popup matches the iOS screenshot exactly (blur, rounding, spacing).
+- **Interaction**: Confirm "Select Notes" correctly triggers the edit mode.
+- **Functional Stubs**: Ensure clicking the other options provides visual feedback (snackbars for now).
+- **Header Fidelity**: Verify the "Notes" count subtitle and large title are still correctly weighted.

@@ -6,6 +6,7 @@ class NoteModel {
   final bool isPinned;
   final bool isArchived;
   final bool isLocked;
+  final int attachmentCount;
   final DateTime? updatedAt;
 
   NoteModel({
@@ -16,6 +17,7 @@ class NoteModel {
     this.isPinned = false,
     this.isArchived = false,
     this.isLocked = false,
+    this.attachmentCount = 0,
     this.updatedAt,
   });
 
@@ -30,6 +32,7 @@ class NoteModel {
       isPinned: json['IsPinned'] ?? json['isPinned'] ?? false,
       isArchived: json['IsArchived'] ?? json['isArchived'] ?? false,
       isLocked: json['IsLocked'] ?? json['isLocked'] ?? false,
+      attachmentCount: json['AttachmentCount'] ?? json['attachmentCount'] ?? 0,
       updatedAt: json['UpdatedAt'] != null 
           ? DateTime.tryParse(json['UpdatedAt']) 
           : (json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null),
