@@ -1,5 +1,4 @@
-- [ ] Modernize `SplashView` with clean background and refined animations
-- [ ] Update `LoginView` with iOS-style cards, text, and staggered animations
-- [ ] Update `RegisterView` with matching iOS aesthetic and entry animations
-- [ ] Replace all deprecated `withOpacity` with `withValues`
-- [ ] Verify functional integrity of auth flow
+- [ ] Update `NoteController` with note list action stubs
+- [ ] Create `NoteContextMenu` widget with high-fidelity iOS styling
+- [ ] Replace `PopupMenuButton` in `NoteListView` with the new context menu trigger
+- [ ] Verify visual match and "Select Notes" functional link

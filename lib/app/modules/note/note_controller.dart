@@ -5,6 +5,8 @@ import '../../data/services/folder_service.dart';
 import '../../data/services/note_service.dart';
 import '../../theme/app_theme.dart';
 
+import 'widgets/note_move_folder_modal.dart';
+
 class NoteController extends GetxController {
   final _noteService = Get.find<NoteService>();
 
@@ -76,76 +78,36 @@ class NoteController extends GetxController {
       }
 
       Get.bottomSheet(
-        Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Move to Folder",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: allFolders.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (ctx, idx) {
-                    final folder = allFolders[idx];
-                    final isCurrent = folder.id == currentFolderId;
-                    return ListTile(
-                      leading: Icon(
-                        folder.icon,
-                        color: folder.color,
-                      ),
-                      title: Text(folder.name),
-                      trailing: isCurrent
-                          ? const Icon(Icons.check, color: AppTheme.folderYellow)
-                          : null,
-                      onTap: isCurrent
-                          ? null
-                          : () async {
-                              Get.back();
-                              try {
-                                for (final noteId in targets) {
-                                  final note = notes.firstWhereOrNull((n) => n.id == noteId);
-                                  if (note != null) {
-                                    await _noteService.saveNote(
-                                      folder.id,
-                                      note.title,
-                                      noteId: note.id,
-                                    );
-                                  }
-                                }
-                                selectedNoteIds.clear();
-                                isEditing.value = false;
-                                await fetchNotes(folderId: currentFolderId);
-                                Get.snackbar(
-                                  "Success",
-                                  "Moved notes to ${folder.name}",
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              } catch (e) {
-                                Get.snackbar("Error", "Failed to move notes");
-                              }
-                            },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        NoteMoveFolderModal(
+          folders: allFolders,
+          currentFolderId: currentFolderId,
+          onFolderSelected: (folder) async {
+            Get.back();
+            try {
+              for (final noteId in targets) {
+                final note = notes.firstWhereOrNull((n) => n.id == noteId);
+                if (note != null) {
+                  await _noteService.saveNote(
+                    folder.id,
+                    note.title,
+                    noteId: note.id,
+                  );
+                }
+              }
+              selectedNoteIds.clear();
+              isEditing.value = false;
+              await fetchNotes(folderId: currentFolderId);
+              Get.snackbar(
+                "Success",
+                "Moved notes to ${folder.name}",
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            } catch (e) {
+              Get.snackbar("Error", "Failed to move notes");
+            }
+          },
         ),
+        isScrollControlled: true,
       );
     } catch (e) {
       Get.snackbar("Error", "Could not fetch folders");
@@ -292,5 +254,22 @@ class NoteController extends GetxController {
     blocks.add(ChecklistBlock(id: id, items: [
       ChecklistItem(id: "1", text: "")
     ]));
+  }
+
+  // Note List Management Features
+  void toggleViewMode() {
+    Get.snackbar("Info", "Gallery View coming soon");
+  }
+
+  void updateSorting(String criteria) {
+    Get.snackbar("Info", "Sorting by $criteria");
+  }
+
+  void toggleDateGrouping() {
+    Get.snackbar("Info", "Date grouping toggled");
+  }
+
+  void viewAllAttachments() {
+    Get.snackbar("Info", "Viewing all attachments");
   }
 }

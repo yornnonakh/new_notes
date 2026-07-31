@@ -27,7 +27,7 @@ class ApiService extends GetxService {
 
     _dio.interceptors.add(LogInterceptor(
       requestBody: true,
-      responseBody: true,
+      responseBody: false, // Set to false to reduce console clutter
       logPrint: (obj) => debugPrint(obj.toString()),
     ));
 

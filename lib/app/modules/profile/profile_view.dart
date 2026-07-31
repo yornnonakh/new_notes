@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:new_note/app/widgets/glass_widgets.dart';
 import 'profile_controller.dart';
 import '../../theme/app_theme.dart';
 
@@ -21,9 +22,15 @@ class ProfileView extends GetView<ProfileController> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.chevron_left, color: AppTheme.folderYellow, size: 36),
+                    LiquidGlassContainer(
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      child: IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.chevron_left, color: AppTheme.textSecondary, size: 36,
+                            ),padding: EdgeInsets.zero
+                      ),
                     ),
                     const Spacer(),
                   ],
@@ -92,37 +99,30 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                     
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Column(
-                        children: [
-                          _buildThemeOption(context, "Light Mode", Icons.light_mode, ThemeMode.light),
-                          const Divider(indent: 56, height: 1),
-                          _buildThemeOption(context, "Dark Mode", Icons.dark_mode, ThemeMode.dark),
-                          const Divider(indent: 56, height: 1),
-                          _buildThemeOption(context, "System Default", Icons.settings_brightness, ThemeMode.system),
-                        ],
-                      ),
+                    GlassCard(
+                      borderRadius: 20,
+                      children: [
+                        _buildThemeOption(context, "Light Mode", Icons.light_mode_outlined, ThemeMode.light),
+                        const Divider(indent: 56, height: 1),
+                        _buildThemeOption(context, "Dark Mode", Icons.dark_mode_outlined, ThemeMode.dark),
+                        const Divider(indent: 56, height: 1),
+                        _buildThemeOption(context, "System Default", Icons.settings_brightness_outlined, ThemeMode.system),
+                      ],
                     ).animate().fadeIn(delay: const Duration(milliseconds: 200)).slideY(begin: 0.1, end: 0),
                     
                     const SizedBox(height: 32),
                     
                     // Account Section
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        onTap: controller.logout,
-                        leading: const Icon(Icons.logout, color: Colors.redAccent),
-                        title: const Text("Logout", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                        trailing: const Icon(Icons.chevron_right, color: Colors.redAccent),
-                      ),
+                    GlassCard(
+                      borderRadius: 20,
+                      children: [
+                        ListTile(
+                          onTap: controller.logout,
+                          leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                          title: const Text("Logout", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                          trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent),
+                        ),
+                      ],
                     ).animate().fadeIn(delay: const Duration(milliseconds: 400)).slideY(begin: 0.1, end: 0),
                     
                     const SizedBox(height: 40),
@@ -146,7 +146,15 @@ class ProfileView extends GetView<ProfileController> {
         leading: Icon(icon, color: isSelected ? AppTheme.folderYellow : (isDark ? Colors.white70 : AppTheme.textGrey)),
         title: Text(title, style: TextStyle(color: isDark ? Colors.white : AppTheme.textPrimary)),
         trailing: isSelected 
-            ? const Icon(Icons.check_circle, color: AppTheme.folderYellow) 
+            ? Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.folderYellow,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
+              )
             : null,
       );
     });

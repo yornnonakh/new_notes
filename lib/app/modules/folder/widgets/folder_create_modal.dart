@@ -144,11 +144,12 @@ class _FolderCreateModalState extends State<FolderCreateModal> {
   Widget _buildHeader(BuildContext context) {
     final scale = MediaQuery.textScalerOf(context).scale(1);
     final growth = (scale - 1).clamp(0.0, 1.0);
-    final controlSize = 44 + (growth * 12);
+    final controlSize = 38 + (growth * 10); // Slightly smaller as seen in screenshot
 
-    return SafeArea(
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
       child: SizedBox(
-        height: controlSize,
+        height: 50,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -159,33 +160,24 @@ class _FolderCreateModalState extends State<FolderCreateModal> {
                 size: controlSize,
                 semanticLabel: 'Close',
                 onTap: () => Get.back<void>(),
-                backgroundColor: _glassColor(context),
-                borderColor: _glassBorderColor(context),
-                shadowColor: Colors.black.withValues(
-                  alpha: _isDark(context) ? 0.28 : 0.08,
-                ),
-                child: Icon(
+                backgroundColor: Colors.white,
+                borderColor: AppTheme.dividerColor.withValues(alpha: 0.3),
+                shadowColor: Colors.black.withValues(alpha: 0.04),
+                child: const Icon(
                   CupertinoIcons.xmark,
-                  color: _primaryTextColor(context),
-                  size: 24,
+                  color: Colors.black,
+                  size: 18,
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: controlSize + 12),
-              child: Text(
-                _isRenaming ? 'Rename Folder' : 'New Folder',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _primaryTextColor(context),
-                  fontFamily: _displayFont,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                  height: 1.1,
-                ),
+            Text(
+              _isRenaming ? 'Rename Folder' : 'New Folder',
+              style: TextStyle(
+                color: AppTheme.textPrimary,
+                fontFamily: _displayFont,
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.4,
               ),
             ),
             Align(
@@ -193,26 +185,17 @@ class _FolderCreateModalState extends State<FolderCreateModal> {
               child: _RoundActionButton(
                 key: const ValueKey('save-folder-button'),
                 size: controlSize,
-                semanticLabel: _isRenaming
-                    ? 'Save folder name'
-                    : 'Create folder',
+                semanticLabel: _isRenaming ? 'Save folder name' : 'Create folder',
                 onTap: _canSave ? _saveFolder : null,
-                backgroundColor: _canSave
-                    ? AppTheme.folderYellow
-                    : AppTheme.folderYellow.withValues(alpha: 0.34),
-                borderColor: Colors.white.withValues(alpha: 0.18),
-                shadowColor: AppTheme.folderYellow.withValues(
-                  alpha: _canSave ? 0.22 : 0,
-                ),
+                backgroundColor: _canSave ? AppTheme.folderYellow : AppTheme.folderYellow.withValues(alpha: 0.4),
+                borderColor: Colors.white.withValues(alpha: 0.2),
+                shadowColor: AppTheme.folderYellow.withValues(alpha: _canSave ? 0.2 : 0),
                 child: _isSaving
-                    ? const CupertinoActivityIndicator(
-                        color: Colors.white,
-                        radius: 10,
-                      )
+                    ? const CupertinoActivityIndicator(color: Colors.white, radius: 8)
                     : const Icon(
-                        CupertinoIcons.checkmark_alt,
+                        CupertinoIcons.checkmark,
                         color: Colors.white,
-                        size: 25,
+                        size: 18,
                       ),
               ),
             ),
@@ -409,17 +392,7 @@ class _FolderCreateModalState extends State<FolderCreateModal> {
     return _isDark(context) ? const Color(0xFF98989D) : const Color(0xFF7C7C80);
   }
 
-  Color _glassColor(BuildContext context) {
-    return _isDark(context)
-        ? Colors.white.withValues(alpha: 0.11)
-        : Colors.white.withValues(alpha: 0.82);
-  }
 
-  Color _glassBorderColor(BuildContext context) {
-    return _isDark(context)
-        ? Colors.white.withValues(alpha: 0.12)
-        : Colors.white.withValues(alpha: 0.72);
-  }
 
   Color _cardBorderColor(BuildContext context) {
     return _isDark(context)

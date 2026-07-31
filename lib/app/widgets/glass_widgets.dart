@@ -16,7 +16,7 @@ class LiquidGlassContainer extends StatelessWidget {
     required this.child,
     this.blur = 20,
     this.opacity = 0.8, // Increased for a more "white card" look while keeping glass effect
-    this.borderRadius = 20,
+    this.borderRadius = 30,
     this.padding,
     this.width,
     this.height,
@@ -53,28 +53,27 @@ class LiquidGlassContainer extends StatelessWidget {
   }
 }
 
-class GlassButton extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
+class GlassCard extends StatelessWidget {
+  final List<Widget> children;
   final double borderRadius;
+  final EdgeInsetsGeometry? padding;
 
-  const GlassButton({
+  const GlassCard({
     super.key,
-    required this.child,
-    required this.onTap,
-    this.borderRadius = 12,
+    required this.children,
+    this.borderRadius = 30,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: LiquidGlassContainer(
-        borderRadius: borderRadius,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        opacity: 0.2, // Keep buttons more transparent
-        child: child,
+    return LiquidGlassContainer(
+      borderRadius: borderRadius,
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 4),
+      opacity: 1.0, // Solid white card matching folder style
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
       ),
     );
   }

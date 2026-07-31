@@ -67,7 +67,7 @@ class NoteDetailView extends GetView<NoteController> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Left: Back button in white circular container
+              // Left: Back button
               GestureDetector(
                 onTap: Get.back,
                 child: Container(
@@ -78,94 +78,77 @@ class NoteDetailView extends GetView<NoteController> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: Icon(
                     CupertinoIcons.chevron_left,
-                    color: _controlColor(context),
-                    size: 22,
+                    color: AppTheme.folderYellow,
+                    size: 24,
                   ),
                 ),
               ),
 
-              // Right: Undo button + Share & More pill container
+              // Right: Undo, Share, More, Done
               Row(
                 children: [
-                  // Undo circular button
+                  _circleAction(CupertinoIcons.arrow_counterclockwise, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _circleAction(CupertinoIcons.share, onTap: () {}),
+                  const SizedBox(width: 8),
+                  _circleAction(CupertinoIcons.ellipsis, onTap: () {}),
+                  const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: controller.saveNote,
                     child: Container(
                       width: controlSize,
                       height: controlSize,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.folderYellow,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
-                      child: Icon(
-                        CupertinoIcons.arrow_counterclockwise,
-                        color: _controlColor(context),
-                        size: 20,
+                      child: const Center(
+                        child: Icon(
+                          CupertinoIcons.checkmark,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // Share + Ellipsis pill container
-                  Container(
-                    height: controlSize,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                          onPressed: () {},
-                          icon: Icon(
-                            CupertinoIcons.share,
-                            color: _controlColor(context),
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 2),
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                          onPressed: () {},
-                          icon: Icon(
-                            CupertinoIcons.ellipsis,
-                            color: _controlColor(context),
-                            size: 20,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleAction(IconData icon, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: AppTheme.textPrimary,
+          size: 20,
         ),
       ),
     );
