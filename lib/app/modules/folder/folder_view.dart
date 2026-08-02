@@ -14,8 +14,9 @@ class FolderView extends GetView<FolderController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: true,
         child: CustomScrollView(
@@ -37,7 +38,7 @@ class FolderView extends GetView<FolderController> {
                           FolderCreateModal(controller: controller),
                           isScrollControlled: true,
                         ),
-                        icon: const Icon(Icons.create_new_folder_outlined, color: AppTheme.textPrimary, size: 24),
+                        icon: Icon(Icons.create_new_folder_outlined, color: theme.colorScheme.onSurface, size: 24),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -72,10 +73,10 @@ class FolderView extends GetView<FolderController> {
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Edit",
                                 style: TextStyle(
-                                  color: AppTheme.textPrimary,
+                                  color: theme.colorScheme.onSurface,
                                   fontSize: 17,
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -88,12 +89,12 @@ class FolderView extends GetView<FolderController> {
             ),
 
             // Large Title
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: Text(
                   "Folders",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  style: theme.textTheme.headlineLarge,
                 ),
               ),
             ),
@@ -111,7 +112,7 @@ class FolderView extends GetView<FolderController> {
                   children: [
                     // iCloud Section (if any)
                     if (controller.iCloudFolders.isNotEmpty) ...[
-                      _buildSectionHeader("iCloud", controller.isICloudExpanded, controller.toggleICloud),
+                      _buildSectionHeader(context, "iCloud", controller.isICloudExpanded, controller.toggleICloud),
                       Obx(() => controller.isICloudExpanded.value
                           ? _buildFolderGroup(context, controller.iCloudFolders)
                           : const SizedBox.shrink()),
@@ -119,7 +120,7 @@ class FolderView extends GetView<FolderController> {
                     ],
 
                     // On My iPhone Section
-                    _buildSectionHeader("On My iPhone", controller.isOnMyiPhoneExpanded, controller.toggleOnMyiPhone),
+                    _buildSectionHeader(context, "On My iPhone", controller.isOnMyiPhoneExpanded, controller.toggleOnMyiPhone),
                     Obx(() => controller.isOnMyiPhoneExpanded.value
                         ? _buildFolderGroup(context, controller.onMyiPhoneFolders, includeRecentlyDeleted: true)
                         : const SizedBox.shrink()),
@@ -132,11 +133,12 @@ class FolderView extends GetView<FolderController> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(),
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
-  Widget _buildSectionHeader(String title, RxBool isExpanded, VoidCallback onTap) {
+  Widget _buildSectionHeader(BuildContext context, String title, RxBool isExpanded, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: GestureDetector(
@@ -145,7 +147,7 @@ class FolderView extends GetView<FolderController> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+            Text(title, style: theme.textTheme.titleLarge),
             Obx(() => Icon(
                   isExpanded.value ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
                   color: AppTheme.folderYellow,
@@ -181,6 +183,7 @@ class FolderView extends GetView<FolderController> {
   }
 
   Widget _buildFolderTile(BuildContext context, FolderModel folder) {
+    final theme = Theme.of(context);
     return Obx(() {
       final isEditing = controller.isEditing.value;
       final isSystem = controller.isSystemFolder(folder);
@@ -199,10 +202,10 @@ class FolderView extends GetView<FolderController> {
             opacity: 0.08,
             blur: 15,
             child: Center(
-              child: Icon(folder.icon, color: folder.color, size: 20),
+              child: Icon(folder.icon, color: AppTheme.folderYellow, size: 20),
             ),
           ),
-          title: Text(folder.name, style: const TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
+          title: Text(folder.name, style: theme.textTheme.bodyLarge),
           trailing: isEditing && !isSystem
               ? Row(
                   mainAxisSize: MainAxisSize.min,
@@ -222,15 +225,15 @@ class FolderView extends GetView<FolderController> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Icon(Icons.reorder, color: AppTheme.textGrey, size: 24),
+                    Icon(Icons.reorder, color: theme.colorScheme.onSurfaceVariant, size: 24),
                   ],
                 )
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("${folder.noteCount}", style: const TextStyle(fontSize: 17, color: AppTheme.textGrey)),
+                    Text("${folder.noteCount}", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                     const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+                    Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3), size: 20),
                   ],
                 ),
         ),
@@ -239,6 +242,7 @@ class FolderView extends GetView<FolderController> {
   }
 
   Widget _buildRecentlyDeletedTile(BuildContext context) {
+    final theme = Theme.of(context);
     return Obx(() {
       final isEditing = controller.isEditing.value;
 
@@ -254,16 +258,16 @@ class FolderView extends GetView<FolderController> {
             opacity: 0.08,
             blur: 15,
             child: const Center(
-              child: Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+              child: Icon(Icons.delete_outline_rounded, color: AppTheme.folderYellow, size: 20),
             ),
           ),
-          title: const Text("Recently Deleted", style: TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
+          title: Text("Recently Deleted", style: theme.textTheme.bodyLarge),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("${controller.deletedCount.value}", style: const TextStyle(fontSize: 17, color: AppTheme.textGrey)),
+              Text("${controller.deletedCount.value}", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+              Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3), size: 20),
             ],
           ),
         ),
@@ -272,6 +276,7 @@ class FolderView extends GetView<FolderController> {
   }
 
   Widget _buildProfileTile(BuildContext context) {
+    final theme = Theme.of(context);
     return Obx(() {
       final isEditing = controller.isEditing.value;
 
@@ -290,14 +295,15 @@ class FolderView extends GetView<FolderController> {
               child: Icon(Icons.person_outline, color: AppTheme.folderYellow, size: 20),
             ),
           ),
-          title: const Text("Profile", style: TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
-          trailing: const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+          title: Text("Profile", style: theme.textTheme.bodyLarge),
+          trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3), size: 20),
         ),
       );
     });
   }
 
   Widget _buildTrashTile(BuildContext context) {
+    final theme = Theme.of(context);
     return Obx(() {
       final isEditing = controller.isEditing.value;
 
@@ -313,17 +319,18 @@ class FolderView extends GetView<FolderController> {
             opacity: 0.08,
             blur: 15,
             child: const Center(
-              child: Icon(Icons.delete_sweep_rounded, color: Colors.redAccent, size: 20),
+              child: Icon(Icons.delete_sweep_rounded, color: AppTheme.folderYellow, size: 20),
             ),
           ),
-          title: const Text("Trash", style: TextStyle(fontSize: 17, color: AppTheme.textPrimary, fontWeight: FontWeight.w400)),
-          trailing: const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20),
+          title: Text("Trash", style: theme.textTheme.bodyLarge),
+          trailing: Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3), size: 20),
         ),
       );
     });
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -335,7 +342,7 @@ class FolderView extends GetView<FolderController> {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
@@ -348,12 +355,12 @@ class FolderView extends GetView<FolderController> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: AppTheme.textGrey, size: 22),
+                      Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant, size: 22),
                       const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text("Search", style: TextStyle(color: AppTheme.textGrey, fontSize: 17)),
+                      Expanded(
+                        child: Text("Search", style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 17)),
                       ),
-                      const Icon(Icons.mic, color: AppTheme.textGrey, size: 22),
+                      Icon(Icons.mic, color: theme.colorScheme.onSurfaceVariant, size: 22),
                     ],
                   ),
                 ),
@@ -366,7 +373,7 @@ class FolderView extends GetView<FolderController> {
               borderRadius: 25,
               child: IconButton(
                 onPressed: () => controller.createNewNote(),
-                icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 28),
+                icon: Icon(Icons.open_in_new, color: theme.colorScheme.onSurface, size: 28),
               ),
             ),
           ],

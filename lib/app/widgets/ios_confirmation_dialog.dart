@@ -19,6 +19,9 @@ class IOSConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -27,7 +30,9 @@ class IOSConfirmationDialog extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark 
+                  ? const Color(0xFF252525).withValues(alpha: 0.85) 
+                  : Colors.white.withValues(alpha: 0.9),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -36,15 +41,20 @@ class IOSConfirmationDialog extends StatelessWidget {
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                         height: 1.3,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                   ),
-                  const Divider(height: 1, thickness: 0.5),
+                  Divider(
+                    height: 1, 
+                    thickness: 0.5, 
+                    color: isDark ? const Color(0xFF38383A) : AppTheme.dividerColor,
+                  ),
                   Row(
                     children: [
                       Expanded(
@@ -56,17 +66,21 @@ class IOSConfirmationDialog extends StatelessWidget {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Cancel",
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
+                              color: isDark ? Colors.white : AppTheme.textPrimary,
                             ),
                           ),
                         ),
                       ),
-                      Container(width: 0.5, height: 50, color: AppTheme.dividerColor),
+                      Container(
+                        width: 0.5, 
+                        height: 50, 
+                        color: isDark ? const Color(0xFF38383A) : AppTheme.dividerColor,
+                      ),
                       Expanded(
                         child: TextButton(
                           onPressed: () {

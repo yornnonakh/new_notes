@@ -10,8 +10,9 @@ class LoginView extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -29,12 +30,12 @@ class LoginView extends GetView<AuthController> {
             ),
 
             // Large Title
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: Text(
                   "Login",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  style: theme.textTheme.headlineLarge,
                 ),
               ),
             ),
@@ -50,11 +51,15 @@ class LoginView extends GetView<AuthController> {
                     Container(
                       width: 100,
                       height: 100,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
                         shape: BoxShape.circle,
                         boxShadow: [
-                          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5)),
+                          BoxShadow(
+                            color: theme.brightness == Brightness.dark ? Colors.black26 : Colors.black12, 
+                            blurRadius: 10, 
+                            offset: const Offset(0, 5),
+                          ),
                         ],
                       ),
                       child: const Icon(Icons.note_alt_rounded, size: 50, color: AppTheme.folderYellow),
@@ -62,20 +67,16 @@ class LoginView extends GetView<AuthController> {
                     
                     const SizedBox(height: 32),
                     
-                    const Text(
+                    Text(
                       "Welcome Back",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                      ),
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                     
                     const SizedBox(height: 8),
                     
-                    const Text(
+                    Text(
                       "Login to your account",
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                      style: theme.textTheme.bodyMedium,
                     ).animate().fadeIn(delay: 300.ms),
                     
                     const SizedBox(height: 40),
@@ -84,7 +85,7 @@ class LoginView extends GetView<AuthController> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -97,12 +98,14 @@ class LoginView extends GetView<AuthController> {
                       child: Column(
                         children: [
                           _buildTextField(
+                            context,
                             controller: controller.phoneController,
                             hint: "Phone Number",
                             icon: Icons.phone_outlined,
                           ),
                           const SizedBox(height: 20),
                           _buildTextField(
+                            context,
                             controller: controller.passwordController,
                             hint: "Password",
                             icon: Icons.lock_outline,
@@ -140,9 +143,9 @@ class LoginView extends GetView<AuthController> {
                     
                     TextButton(
                       onPressed: () => Get.toNamed(Routes.REGISTER),
-                      child: const Text(
+                      child: Text(
                         "Don't have an account? Register",
-                        style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                       ),
                     ).animate().fadeIn(delay: 600.ms),
                   ],
@@ -155,25 +158,27 @@ class LoginView extends GetView<AuthController> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(
+    BuildContext context, {
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool isPassword = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.bodyColor.withValues(alpha: 0.5),
+        color: theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword,
-        style: const TextStyle(color: AppTheme.textPrimary),
+        style: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: AppTheme.textGrey),
-          prefixIcon: Icon(icon, color: AppTheme.textGrey),
+          hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          prefixIcon: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),

@@ -37,6 +37,7 @@ class FolderContextMenu extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildMenuItem(
+                        context,
                         "Add Folder",
                         Icons.create_new_folder_outlined,
                         onTap: () {
@@ -47,8 +48,9 @@ class FolderContextMenu extends StatelessWidget {
                           );
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Move This Folder",
                         Icons.folder_open_outlined,
                         onTap: () {
@@ -56,8 +58,9 @@ class FolderContextMenu extends StatelessWidget {
                           controller.onMoveFolder(folder);
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Rename",
                         Icons.edit_outlined,
                         onTap: () {
@@ -65,8 +68,9 @@ class FolderContextMenu extends StatelessWidget {
                           controller.onRenameFolder(folder);
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Group By Date",
                         Icons.calendar_view_day_outlined,
                         subtitle: "Default (On)",
@@ -76,8 +80,9 @@ class FolderContextMenu extends StatelessWidget {
                           controller.onToggleGroupByDate(folder);
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Delete",
                         Icons.delete_outline,
                         color: Colors.redAccent,
@@ -86,8 +91,9 @@ class FolderContextMenu extends StatelessWidget {
                           controller.onDeleteFolder(folder);
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Convert to Smart Folder",
                         Icons.settings_outlined,
                         onTap: () {
@@ -111,6 +117,7 @@ class FolderContextMenu extends StatelessWidget {
   }
 
   Widget _buildMenuItem(
+    BuildContext context,
     String title,
     IconData icon, {
     String? subtitle,
@@ -118,27 +125,35 @@ class FolderContextMenu extends StatelessWidget {
     Color? color,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final primaryColor = color ?? theme.colorScheme.onSurface;
+    
     return ListTile(
       onTap: onTap,
       dense: true,
       visualDensity: VisualDensity.compact,
-      leading: Icon(icon, color: color ?? AppTheme.textPrimary, size: 22),
+      leading: Icon(icon, color: primaryColor, size: 22),
       title: Text(
         title,
         style: TextStyle(
-          color: color ?? AppTheme.textPrimary,
+          color: primaryColor,
           fontSize: 17,
           fontWeight: FontWeight.w400,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: const TextStyle(color: AppTheme.textGrey, fontSize: 13))
+          ? Text(subtitle, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13))
           : null,
       trailing: trailing,
     );
   }
 
-  Widget _buildDivider() {
-    return const Divider(indent: 56, height: 1, thickness: 0.5);
+  Widget _buildDivider(BuildContext context) {
+    return Divider(
+      indent: 56, 
+      height: 1, 
+      thickness: 0.5, 
+      color: Theme.of(context).dividerColor,
+    );
   }
 }

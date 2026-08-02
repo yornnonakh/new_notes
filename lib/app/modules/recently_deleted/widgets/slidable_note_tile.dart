@@ -78,6 +78,7 @@ class _SlidableNoteTileState extends State<SlidableNoteTile> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onHorizontalDragUpdate: _onHorizontalDragUpdate,
       onHorizontalDragEnd: _onHorizontalDragEnd,
@@ -86,7 +87,7 @@ class _SlidableNoteTileState extends State<SlidableNoteTile> with SingleTickerPr
           // Background Actions
           Positioned.fill(
             child: Container(
-              color: const Color(0xFFF2F2F7).withValues(alpha: 0.5),
+              color: theme.scaffoldBackgroundColor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -111,7 +112,7 @@ class _SlidableNoteTileState extends State<SlidableNoteTile> with SingleTickerPr
           Transform.translate(
             offset: Offset(_dragExtent, 0),
             child: Container(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               child: widget.child,
             ),
           ),

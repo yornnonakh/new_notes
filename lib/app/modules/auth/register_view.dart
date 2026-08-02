@@ -10,8 +10,9 @@ class RegisterView extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -27,7 +28,11 @@ class RegisterView extends GetView<AuthController> {
                       borderRadius: 22,
                       child: IconButton(
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.chevron_left, color: AppTheme.textSecondary, size: 30),
+                        icon: Icon(
+                          Icons.chevron_left, 
+                          color: theme.colorScheme.onSurfaceVariant, 
+                          size: 30,
+                        ),
                         padding: EdgeInsets.zero,
                       ),
                     ),
@@ -38,12 +43,12 @@ class RegisterView extends GetView<AuthController> {
             ),
 
             // Large Title
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: Text(
                   "Register",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  style: theme.textTheme.headlineLarge,
                 ),
               ),
             ),
@@ -55,20 +60,16 @@ class RegisterView extends GetView<AuthController> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Create Account",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                      ),
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
                     
                     const SizedBox(height: 8),
                     
-                    const Text(
+                    Text(
                       "Sign up to get started",
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                      style: theme.textTheme.bodyMedium,
                     ).animate().fadeIn(delay: 100.ms),
                     
                     const SizedBox(height: 40),
@@ -77,7 +78,7 @@ class RegisterView extends GetView<AuthController> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -90,18 +91,21 @@ class RegisterView extends GetView<AuthController> {
                       child: Column(
                         children: [
                           _buildTextField(
+                            context,
                             controller: controller.nameController,
                             hint: "Full Name",
                             icon: Icons.person_outline,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
+                            context,
                             controller: controller.phoneController,
                             hint: "Phone Number",
                             icon: Icons.phone_outlined,
                           ),
                           const SizedBox(height: 16),
                           _buildTextField(
+                            context,
                             controller: controller.passwordController,
                             hint: "Password",
                             icon: Icons.lock_outline,
@@ -139,9 +143,9 @@ class RegisterView extends GetView<AuthController> {
                     
                     TextButton(
                       onPressed: () => Get.back(),
-                      child: const Text(
+                      child: Text(
                         "Already have an account? Login",
-                        style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                       ),
                     ).animate().fadeIn(delay: 400.ms),
                   ],
@@ -154,25 +158,27 @@ class RegisterView extends GetView<AuthController> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(
+    BuildContext context, {
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool isPassword = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.bodyColor.withValues(alpha: 0.5),
+        color: theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword,
-        style: const TextStyle(color: AppTheme.textPrimary),
+        style: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: AppTheme.textGrey),
-          prefixIcon: Icon(icon, color: AppTheme.textGrey),
+          hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          prefixIcon: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),

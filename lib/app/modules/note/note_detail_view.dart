@@ -15,17 +15,16 @@ class NoteDetailView extends GetView<NoteController> {
   const NoteDetailView({super.key});
 
   static const String _displayFont = 'CupertinoSystemDisplay';
-  static const String _textFont = 'CupertinoSystemText';
   static const double _maxContentWidth = 600;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: _backgroundColor(context),
+        backgroundColor: theme.scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           bottom: false,
@@ -35,9 +34,9 @@ class NoteDetailView extends GetView<NoteController> {
               Expanded(
                 child: Obx(() {
                   if (controller.isLoading.value) {
-                    return const Center(
-                      child: CupertinoActivityIndicator(
-                        color: AppTheme.folderYellow,
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: theme.primaryColor,
                       ),
                     );
                   }
@@ -58,6 +57,7 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _buildTopBar(BuildContext context) {
+    final theme = Theme.of(context);
     final controlSize = 40.0;
 
     return _pageContent(
@@ -87,17 +87,17 @@ class NoteDetailView extends GetView<NoteController> {
               // Right: Undo, Share, More, Done
               Row(
                 children: [
-                  _circleAction(CupertinoIcons.arrow_counterclockwise, onTap: () {}),
+                  _circleAction(context, CupertinoIcons.arrow_counterclockwise, onTap: () {}),
                   const SizedBox(width: 8),
-                  _circleAction(CupertinoIcons.share, onTap: () {}),
+                  _circleAction(context, CupertinoIcons.share, onTap: () {}),
                   const SizedBox(width: 8),
-                  _circleAction(CupertinoIcons.ellipsis, onTap: () {}),
+                  _circleAction(context, CupertinoIcons.ellipsis, onTap: () {}),
                   const SizedBox(width: 8),
                   LiquidGlassContainer(
                     width: controlSize,
                     height: controlSize,
                     borderRadius: controlSize / 2,
-                    opacity: 1.0, // Solid yellow look
+                    opacity: 1.0, 
                     child: GestureDetector(
                       onTap: controller.saveNote,
                       child: Container(
@@ -124,7 +124,8 @@ class NoteDetailView extends GetView<NoteController> {
     );
   }
 
-  Widget _circleAction(IconData icon, {required VoidCallback onTap}) {
+  Widget _circleAction(BuildContext context, IconData icon, {required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return LiquidGlassContainer(
       width: 40,
       height: 40,
@@ -134,7 +135,7 @@ class NoteDetailView extends GetView<NoteController> {
         child: Center(
           child: Icon(
             icon,
-            color: AppTheme.textPrimary,
+            color: theme.colorScheme.onSurface,
             size: 20,
           ),
         ),
@@ -142,21 +143,23 @@ class NoteDetailView extends GetView<NoteController> {
     );
   }
 
-  Widget _toolbarIcon({required IconData icon, required VoidCallback onTap}) {
+  Widget _toolbarIcon(BuildContext context, {required IconData icon, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return LiquidGlassContainer(
       width: 38,
       height: 38,
       borderRadius: 19,
-      opacity: 0.1, // Subtle glass effect for toolbar tools
+      opacity: 0.1, 
       child: IconButton(
         padding: EdgeInsets.zero,
         onPressed: onTap,
-        icon: Icon(icon, color: AppTheme.textPrimary, size: 22),
+        icon: Icon(icon, color: theme.colorScheme.onSurface, size: 22),
       ),
     );
   }
 
   Widget _buildEditor(BuildContext context) {
+    final theme = Theme.of(context);
     final noteDate = controller.currentNote.value?.updatedAt ?? DateTime.now();
     final horizontalInset = _editorInset(context);
 
@@ -169,14 +172,7 @@ class NoteDetailView extends GetView<NoteController> {
             child: Text(
               DateFormat("MMMM d, yyyy 'at' h:mm a").format(noteDate),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: _secondaryTextColor(context),
-                fontFamily: _textFont,
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                letterSpacing: -0.1,
-                height: 1.2,
-              ),
+              style: theme.textTheme.bodySmall,
             ),
           ),
           const SizedBox(height: 11),
@@ -189,23 +185,10 @@ class NoteDetailView extends GetView<NoteController> {
             keyboardType: TextInputType.multiline,
             textCapitalization: TextCapitalization.sentences,
             scrollPadding: const EdgeInsets.only(bottom: 92),
-            style: TextStyle(
-              color: _primaryTextColor(context),
-              fontFamily: _displayFont,
-              fontSize: 29,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.7,
-              height: 1.13,
-            ),
+            style: theme.textTheme.headlineLarge,
             decoration: InputDecoration(
               hintText: 'Title',
-              hintStyle: TextStyle(
-                color: _secondaryTextColor(context),
-                fontFamily: _displayFont,
-                fontSize: 29,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.7,
-              ),
+              hintStyle: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
@@ -221,6 +204,7 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _buildBlock(BuildContext context, NoteBlock block, int blockIndex) {
+    final theme = Theme.of(context);
     if (block is TextBlock) {
       final textController = controller.getTextController(block.id, block.text);
 
@@ -236,22 +220,10 @@ class NoteDetailView extends GetView<NoteController> {
           textCapitalization: TextCapitalization.sentences,
           scrollPadding: const EdgeInsets.only(bottom: 92),
           onChanged: (value) => controller.updateTextBlock(blockIndex, value),
-          style: TextStyle(
-            color: _primaryTextColor(context),
-            fontFamily: _textFont,
-            fontSize: 17,
-            fontWeight: FontWeight.w400,
-            letterSpacing: -0.15,
-            height: 1.45,
-          ),
+          style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
           decoration: InputDecoration(
             hintText: 'Start writing...',
-            hintStyle: TextStyle(
-              color: _secondaryTextColor(context),
-              fontFamily: _textFont,
-              fontSize: 17,
-              fontWeight: FontWeight.w400,
-            ),
+            hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -277,6 +249,7 @@ class NoteDetailView extends GetView<NoteController> {
     ChecklistBlock block,
     int blockIndex,
   ) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Column(
@@ -306,7 +279,7 @@ class NoteDetailView extends GetView<NoteController> {
                               : CupertinoIcons.circle,
                           color: entry.value.checked
                               ? AppTheme.folderYellow
-                              : _secondaryTextColor(context),
+                              : theme.colorScheme.onSurfaceVariant,
                           size: 21,
                         ),
                       ),
@@ -331,17 +304,12 @@ class NoteDetailView extends GetView<NoteController> {
                       entry.key,
                       value,
                     ),
-                    style: TextStyle(
-                      color: _primaryTextColor(context),
-                      fontFamily: _textFont,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.15,
+                    style: theme.textTheme.bodyLarge?.copyWith(
                       height: 1.45,
                       decoration: entry.value.checked
                           ? TextDecoration.lineThrough
                           : null,
-                      decorationColor: _secondaryTextColor(context),
+                      decorationColor: theme.colorScheme.onSurfaceVariant,
                     ),
                     decoration: const InputDecoration(
                       border: InputBorder.none,
@@ -407,25 +375,25 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _attachmentPlaceholder(BuildContext context) {
+    final theme = Theme.of(context);
     return ColoredBox(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? const Color(0xFF2C2C2E)
-          : const Color(0xFFF2F2F7),
+      color: theme.colorScheme.surface,
       child: Center(
         child: Icon(
           CupertinoIcons.photo,
           size: 27,
-          color: _secondaryTextColor(context),
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );
   }
 
   Widget _buildEditingToolbar(BuildContext context) {
+    final theme = Theme.of(context);
     const controlHeight = 50.0;
 
     return ColoredBox(
-      color: _backgroundColor(context),
+      color: theme.scaffoldBackgroundColor,
       child: SafeArea(
         top: false,
         minimum: const EdgeInsets.only(bottom: 12),
@@ -440,7 +408,7 @@ class NoteDetailView extends GetView<NoteController> {
                   height: controlHeight,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
@@ -453,16 +421,19 @@ class NoteDetailView extends GetView<NoteController> {
                   child: Row(
                     children: [
                       _toolbarIcon(
+                        context,
                         icon: Icons.checklist_rtl_rounded,
                         onTap: controller.addChecklistBlock,
                       ),
                       const SizedBox(width: 4),
                       _toolbarIcon(
+                        context,
                         icon: CupertinoIcons.paperclip,
                         onTap: () {},
                       ),
                       const SizedBox(width: 4),
                       _toolbarIcon(
+                        context,
                         icon: CupertinoIcons.pencil_outline,
                         onTap: () {},
                       ),
@@ -477,10 +448,10 @@ class NoteDetailView extends GetView<NoteController> {
                   borderRadius: controlHeight / 2,
                   child: GestureDetector(
                     onTap: controller.saveNote,
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         CupertinoIcons.square_pencil,
-                        color: AppTheme.textPrimary,
+                        color: theme.colorScheme.onSurface,
                         size: 24,
                       ),
                     ),
@@ -507,25 +478,5 @@ class NoteDetailView extends GetView<NoteController> {
 
   double _editorInset(BuildContext context) {
     return (MediaQuery.sizeOf(context).width * 0.065).clamp(21.0, 32.0);
-  }
-
-  bool _isDark(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
-
-  Color _backgroundColor(BuildContext context) {
-    return _isDark(context) ? Colors.black : Colors.white;
-  }
-
-  Color _primaryTextColor(BuildContext context) {
-    return _isDark(context) ? Colors.white : AppTheme.textPrimary;
-  }
-
-  Color _secondaryTextColor(BuildContext context) {
-    return _isDark(context) ? const Color(0xFF98989D) : AppTheme.textGrey;
-  }
-
-  Color _controlColor(BuildContext context) {
-    return _isDark(context) ? Colors.white : AppTheme.textPrimary;
   }
 }
