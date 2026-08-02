@@ -14,8 +14,12 @@ class SearchView extends GetView<sc.SearchController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
+            // Sticky Top Bar for Search
+            _buildTopBar(context),
+            
             Expanded(
               child: Obx(() {
                 if (controller.isSearching.value) {
@@ -27,6 +31,36 @@ class SearchView extends GetView<sc.SearchController> {
             _buildBottomSearchBar(context),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          LiquidGlassContainer(
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            child: IconButton(
+              onPressed: () => Get.back(),
+              icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
+              padding: EdgeInsets.zero,
+            ),
+          ),
+          Text(
+            "Search",
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 17,
+            ),
+          ),
+          const SizedBox(width: 44), // Spacer to balance leading
+        ],
       ),
     );
   }

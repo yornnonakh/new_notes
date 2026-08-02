@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:new_note/app/widgets/glass_widgets.dart';
+import '../../widgets/glass_widgets.dart';
 import 'profile_controller.dart';
 import '../../theme/app_theme.dart';
 
@@ -16,46 +16,76 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        bottom: true,
+        top: false, // Allow background to reach the very top
+        bottom: false,
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Top App Bar Actions
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    LiquidGlassContainer(
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      child: IconButton(
-                        onPressed: () => Get.back(),
-                        icon: Icon(
-                          Icons.chevron_left, 
-                          color: theme.colorScheme.onSurfaceVariant, 
-                          size: 36,
-                        ),
-                        padding: EdgeInsets.zero,
+            // SliverAppBar with Dynamic Title Transition (Large to Small)
+            SliverAppBar(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              pinned: true,
+              expandedHeight: 120.0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              // Centered small title (visible when collapsed)
+              title: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final opacity = (1.0 - percentage).clamp(0.0, 1.0);
+                  return Opacity(
+                    opacity: opacity > 0.8 ? 1.0 : 0.0,
+                    child: Text(
+                      "Profile",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
                       ),
                     ),
-                    const Spacer(),
-                  ],
+                  );
+                },
+              ),
+              leading: Center(
+                child: LiquidGlassContainer(
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  child: IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(
+                      Icons.chevron_left, 
+                      color: theme.colorScheme.onSurfaceVariant, 
+                      size: 36,
+                    ),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              leadingWidth: 70,
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
+                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    return Opacity(
+                      opacity: percentage.clamp(0.0, 1.0),
+                      child: Text(
+                        "Profile",
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
 
-            // Large Title Area
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                child: Text(
-                  "Profile",
-                  style: theme.textTheme.headlineLarge,
-                ),
-              ),
-            ),
-
+            // Scrollable Content
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -80,8 +110,13 @@ class ProfileView extends GetView<ProfileController> {
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.person, size: 60, color: AppTheme.folderYellow),
-                          ).animate().scale(duration: const Duration(milliseconds: 600), curve: Curves.easeOutBack),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/icons/otokhi_logo_app.jpg',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
                           const SizedBox(height: 20),
                           Obx(() => Text(
                             controller.userName.value,
@@ -135,7 +170,7 @@ class ProfileView extends GetView<ProfileController> {
                       ],
                     ).animate().fadeIn(delay: const Duration(milliseconds: 400)).slideY(begin: 0.1, end: 0),
                     
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 60), // Extra bottom spacing
                   ],
                 ),
               ),

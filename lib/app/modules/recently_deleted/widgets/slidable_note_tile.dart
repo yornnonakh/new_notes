@@ -111,7 +111,7 @@ class _SlidableNoteTileState extends State<SlidableNoteTile> with SingleTickerPr
           // Foreground Content
           Transform.translate(
             offset: Offset(_dragExtent, 0),
-            child: Container(
+            child: Material(
               color: theme.colorScheme.surface,
               child: widget.child,
             ),

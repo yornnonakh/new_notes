@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
 import '../../data/models/note_model.dart';
 import '../../data/models/folder_model.dart';
 import '../../routes/app_pages.dart';
@@ -12,8 +11,8 @@ import 'recently_deleted_controller.dart';
 import 'widgets/slidable_note_tile.dart';
 
 class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
-  const RecentlyDeletedView({super.key});
 
+  const RecentlyDeletedView({super.key});
   static const String _displayFont = 'CupertinoSystemDisplay';
   static const double _maxContentWidth = 600;
 
@@ -24,160 +23,190 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
+        top: false, // Allow background to reach the very top
         bottom: false,
-        child: Column(
-          children: [
-            // Sticky Top Bar (Header)
-            _pageContent(
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    LiquidGlassContainer(
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      child: IconButton(
-                        onPressed: () => Get.back(),
-                        icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
-                        padding: EdgeInsets.zero,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // SliverAppBar with Dynamic iOS Transition
+            SliverAppBar(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              pinned: true,
+              expandedHeight: 120.0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              // Small centered title
+              title: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final opacity = (1.0 - percentage).clamp(0.0, 1.0);
+                  
+                  return Opacity(
+                    opacity: opacity.clamp(0.0, 1.0),
+                    child: Text(
+                      "Recently Deleted",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
                       ),
                     ),
-                    Obx(() => controller.isEditing.value
-                      ? LiquidGlassContainer(
-                          width: 44,
-                          height: 44,
-                          borderRadius: 22,
-                          child: GestureDetector(
-                            onTap: controller.toggleEditing,
-                            child: Center(
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppTheme.folderYellow,
-                                ),
-                                child: const Icon(Icons.check, color: Colors.white, size: 20),
+                  );
+                },
+              ),
+              leading: Center(
+                child: LiquidGlassContainer(
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  child: IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              leadingWidth: 70,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Obx(() => controller.isEditing.value
+                    ? LiquidGlassContainer(
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        child: GestureDetector(
+                          onTap: controller.toggleEditing,
+                          child: Center(
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppTheme.folderYellow,
                               ),
-                            ),
-                          ),
-                        )
-                      : LiquidGlassContainer(
-                          height: 44,
-                          borderRadius: 22,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: TextButton(
-                            onPressed: controller.toggleEditing,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              "Edit",
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurface,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w400,
-                              ),
+                              child: const Icon(Icons.check, color: Colors.white, size: 20),
                             ),
                           ),
                         ),
-                    ),
-                  ],
+                      )
+                    : LiquidGlassContainer(
+                        height: 44,
+                        borderRadius: 22,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: TextButton(
+                          onPressed: controller.toggleEditing,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            "Edit",
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ),
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
+                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    return Opacity(
+                      opacity: percentage.clamp(0.0, 1.0),
+                      child: Text(
+                        "Recently Deleted",
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
             
-            // Full-Width Scrollable Body
-            Expanded(
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _pageContent(
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 7, 16, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Recently Deleted', style: theme.textTheme.headlineLarge),
-                            Obx(() => Text('${controller.deletedNotes.length + controller.deletedFolders.length} Items', 
-                              style: theme.textTheme.bodyMedium)),
-                          ],
-                        ),
-                      ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Obx(() => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${controller.deletedNotes.length + controller.deletedFolders.length} Items', 
+                      style: theme.textTheme.bodyMedium),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Notes are available here for 30 days. After that time, notes will be permanently deleted. This may take up to 40 days.",
+                      style: theme.textTheme.bodySmall,
                     ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Text(
-                        "Notes are available here for 30 days. After that time, notes will be permanently deleted. This may take up to 40 days.",
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                  ),
-
-                  // Main Items Container
-                  Obx(() {
-                    if (controller.isLoading.value) {
-                      return SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
-                    }
-
-                    final totalItems = controller.deletedNotes.length + controller.deletedFolders.length;
-
-                    if (totalItems == 0) {
-                      return SliverFillRemaining(
-                        hasScrollBody: false, 
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(CupertinoIcons.delete, size: 60, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
-                              const SizedBox(height: 16),
-                              Text("No Deleted Items", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                              const SizedBox(height: 12),
-                              TextButton(
-                                onPressed: controller.fetchDeletedItems,
-                                child: const Text("Check for updates"),
-                              ),
-                            ],
-                          )
-                        )
-                      );
-                    }
-
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      sliver: SliverToBoxAdapter(
-                        child: GlassCard(
-                          borderRadius: 20,
-                          children: [
-                            // Render Folders
-                            for (int i = 0; i < controller.deletedFolders.length; i++) ...[
-                              _buildFolderTile(context, controller.deletedFolders[i]),
-                              if (i < controller.deletedFolders.length - 1 || controller.deletedNotes.isNotEmpty)
-                                const Divider(indent: 56, height: 1),
-                            ],
-                            // Render Notes
-                            for (int i = 0; i < controller.deletedNotes.length; i++) ...[
-                              _buildNoteTile(context, controller.deletedNotes[i]),
-                              if (i < controller.deletedNotes.length - 1)
-                                const Divider(indent: 56, height: 1),
-                            ],
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                  const SliverToBoxAdapter(child: SizedBox(height: 112)),
-                ],
+                  ],
+                )),
               ),
             ),
+
+            // Main Items Container
+            Obx(() {
+              if (controller.isLoading.value) {
+                return SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
+              }
+
+              final totalItems = controller.deletedNotes.length + controller.deletedFolders.length;
+
+              if (totalItems == 0) {
+                return SliverFillRemaining(
+                  hasScrollBody: false, 
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.delete, size: 60, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
+                        const SizedBox(height: 16),
+                        Text("No Deleted Items", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: controller.fetchDeletedItems,
+                          child: const Text("Check for updates"),
+                        ),
+                      ],
+                    )
+                  )
+                );
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                sliver: SliverToBoxAdapter(
+                  child: GlassCard(
+                    borderRadius: 20,
+                    children: [
+                      // Render Folders
+                      for (int i = 0; i < controller.deletedFolders.length; i++) ...[
+                        _buildFolderTile(context, controller.deletedFolders[i]),
+                        if (i < controller.deletedFolders.length - 1 || controller.deletedNotes.isNotEmpty)
+                          const Divider(indent: 56, height: 1),
+                      ],
+                      // Render Notes
+                      for (int i = 0; i < controller.deletedNotes.length; i++) ...[
+                        _buildNoteTile(context, controller.deletedNotes[i]),
+                        if (i < controller.deletedNotes.length - 1)
+                          const Divider(indent: 56, height: 1),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SliverToBoxAdapter(child: SizedBox(height: 112)),
           ],
         ),
       ),

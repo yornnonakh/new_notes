@@ -29,7 +29,7 @@ class IOSConfirmationDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
+            child: Material(
               color: isDark 
                   ? const Color(0xFF252525).withValues(alpha: 0.85) 
                   : Colors.white.withValues(alpha: 0.9),

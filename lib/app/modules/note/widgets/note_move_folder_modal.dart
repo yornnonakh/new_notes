@@ -20,107 +20,108 @@ class NoteMoveFolderModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentFolder = folders.firstWhereOrNull((f) => f.id == currentFolderId);
     
-    return Container(
-      height: Get.height * 0.9,
-      decoration: const BoxDecoration(
-        color: AppTheme.bodyColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.close, color: Colors.black, size: 20),
-                  ),
-                ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      "Select a Folder",
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 32), // Spacer to balance header
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: AppTheme.bodyColor,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: Get.height * 0.9,
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
                 children: [
-                  // Current Folder Summary
-                  if (currentFolder != null) ...[
-                    Row(
-                      children: [
-                        LiquidGlassContainer(
-                          width: 60,
-                          height: 60,
-                          borderRadius: 12,
-                          child: Icon(currentFolder.icon, color: currentFolder.color, size: 36),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(currentFolder.name, 
-                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                            Text("${currentFolder.noteCount} Notes", 
-                              style: const TextStyle(color: AppTheme.textGrey, fontSize: 15)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-
-                  // On My iPhone Section
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8, bottom: 8),
-                    child: Text("On My iPhone", 
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-
-                  GlassCard(
-                    borderRadius: 20,
-                    children: [
-                      // New Folder Action
-                      ListTile(
-                        onTap: () {},
-                        leading: const Icon(Icons.create_new_folder_outlined, color: AppTheme.folderYellow),
-                        title: const Text("New Folder", 
-                          style: TextStyle(color: AppTheme.folderYellow, fontWeight: FontWeight.w500)),
+                  GestureDetector(
+                    onTap: () => Get.back(),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-                      const Divider(indent: 56, height: 1),
-                      
-                      // Folder List
-                      for (int i = 0; i < folders.length; i++) ...[
-                        _buildFolderTile(folders[i]),
-                        if (i < folders.length - 1)
-                          const Divider(indent: 56, height: 1),
-                      ],
-                    ],
+                      child: const Icon(Icons.close, color: Colors.black, size: 20),
+                    ),
                   ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        "Select a Folder",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 32), // Spacer to balance header
                 ],
               ),
             ),
-          ),
-        ],
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Current Folder Summary
+                    if (currentFolder != null) ...[
+                      Row(
+                        children: [
+                          LiquidGlassContainer(
+                            width: 60,
+                            height: 60,
+                            borderRadius: 12,
+                            child: Icon(currentFolder.icon, color: currentFolder.color, size: 36),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(currentFolder.name, 
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                              Text("${currentFolder.noteCount} Notes", 
+                                style: const TextStyle(color: AppTheme.textGrey, fontSize: 15)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // On My iPhone Section
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8, bottom: 8),
+                      child: Text("On My iPhone", 
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    ),
+
+                    GlassCard(
+                      borderRadius: 20,
+                      children: [
+                        // New Folder Action
+                        ListTile(
+                          onTap: () {},
+                          leading: const Icon(Icons.create_new_folder_outlined, color: AppTheme.folderYellow),
+                          title: const Text("New Folder", 
+                            style: TextStyle(color: AppTheme.folderYellow, fontWeight: FontWeight.w500)),
+                        ),
+                        const Divider(indent: 56, height: 1),
+                        
+                        // Folder List
+                        for (int i = 0; i < folders.length; i++) ...[
+                          _buildFolderTile(folders[i]),
+                          if (i < folders.length - 1)
+                            const Divider(indent: 56, height: 1),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,10 +7,10 @@ import 'app/theme/app_theme.dart';
 import 'app/data/services/theme_service.dart';
 
 /*
-  App: Piisiit Notes
+  App: Otokhi Notes
   Date: 08.02.2026
   Update by: branch nona_developer
-  Feature: dark mode and light mode
+  Feature: dark mode and light mode, rebranding to Otokhi
  */
 
 void main() async {
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Piisiit Note",
+      title: "Otokhi Note",
       debugShowCheckedModeBanner: false,
       initialBinding: InitialBinding(),
       initialRoute: AppPages.INITIAL,
