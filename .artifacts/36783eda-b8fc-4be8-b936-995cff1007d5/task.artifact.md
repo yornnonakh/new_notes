@@ -1,5 +1,0 @@
-- [ ] Update `FolderResponse` to include `archive` folders
-- [ ] Refine `NoteService.getTrashNotes` to combine all deleted buckets
-- [ ] Implement Sticky Header in `RecentlyDeletedView`
-- [ ] Implement Sticky Header in `TrashView`
-- [ ] Verify visibility and scrolling behavior

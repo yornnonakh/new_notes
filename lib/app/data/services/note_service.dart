@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart' hide Response;
 import '../models/note_model.dart';
@@ -7,33 +9,49 @@ class NoteService extends GetxService {
   final ApiService _api = Get.find<ApiService>();
 
   Future<List<NoteModel>> getNotes({int? folderId}) async {
-    final response = await _api.dio.get("/api/note", queryParameters: {
-      if (folderId != null) "folderId": folderId,
-    });
-    final data = response.data['data'];
-    if (data == null) return [];
-    
-    // The API returns a Map with 'note', 'archive', 'trash' lists
-    final List noteList = data['note'] ?? [];
-    return noteList
-        .map((e) => NoteModel.fromJson(e))
-        .toList();
+    try {
+      final response = await _api.dio.get("/api/note", queryParameters: {
+        if (folderId != null) "FolderId": folderId,
+      });
+      
+      debugPrint("GET NOTES Response: ${response.data}");
+      
+      final data = response.data['data'];
+      if (data == null) return [];
+      
+      // We combine 'note' (active) and 'archive' (hidden/deleted) to show "all data"
+      final List noteList = data['note'] ?? [];
+      final List archiveList = data['archive'] ?? [];
+      
+      final List combined = [...noteList, ...archiveList];
+      
+      return combined
+          .map((e) => NoteModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      debugPrint("GET NOTES Error: $e");
+      return [];
+    }
   }
 
   Future<List<NoteModel>> getTrashNotes() async {
-    final response = await _api.dio.get("/api/note");
-    final data = response.data['data'];
-    if (data == null) return [];
-    
-    // Combine trash and archive just in case the backend uses archive for deleted items
-    final List trashList = data['trash'] ?? [];
-    final List archiveList = data['archive'] ?? [];
-    
-    final List combined = [...trashList, ...archiveList];
-    
-    return combined
-        .map((e) => NoteModel.fromJson(e))
-        .toList();
+    try {
+      final response = await _api.dio.get("/api/note");
+      final data = response.data['data'];
+      if (data == null) return [];
+      
+      final List trashList = data['trash'] ?? [];
+      final List archiveList = data['archive'] ?? [];
+      
+      final List combined = [...trashList, ...archiveList];
+      
+      return combined
+          .map((e) => NoteModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      debugPrint("GET TRASH Error: $e");
+      return [];
+    }
   }
 
   Future<NoteModel> getNoteDetail(int id) async {
@@ -43,32 +61,32 @@ class NoteService extends GetxService {
 
   Future<void> saveNote(int folderId, String title, {int noteId = 0}) async {
     await _api.dio.post("/api/note/save", data: {
-      "noteId": noteId,
-      "folderId": folderId,
-      "title": title,
+      "NoteId": noteId,
+      "FolderId": folderId,
+      "Title": title,
     });
   }
 
   Future<void> saveContent(int noteId, String title, List<NoteBlock> content) async {
     await _api.dio.post("/api/note/save-content", data: {
-      "id": noteId,
-      "title": title,
-      "content": content.map((e) => e.toJson()).toList(),
+      "NoteId": noteId,
+      "Title": title,
+      "Content": jsonEncode(content.map((e) => e.toJson()).toList()),
     });
   }
 
   Future<void> updateNoteState(int id, {bool? isPinned, bool? isArchived, bool? isLocked}) async {
     await _api.dio.post("/api/note/update-state", data: {
-      "id": id,
-      if (isPinned != null) "isPinned": isPinned,
-      if (isArchived != null) "isArchived": isArchived,
-      if (isLocked != null) "isLocked": isLocked,
+      "NoteId": id,
+      if (isPinned != null) "IsPinned": isPinned,
+      if (isArchived != null) "IsArchived": isArchived,
+      if (isLocked != null) "IsLocked": isLocked,
     });
   }
 
   Future<void> deleteRestoreNote(int id, bool isDelete) async {
     await _api.dio.post("/api/note/delete-restore", data: {
-      "id": id,
+      "NoteId": id,
       "isDelete": isDelete,
     });
   }

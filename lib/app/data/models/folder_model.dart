@@ -24,7 +24,7 @@ class FolderModel {
   factory FolderModel.fromJson(Map<String, dynamic> json) {
     return FolderModel(
       id: json['FolderId'] ?? 0,
-      name: json['FolderName'] ?? '',
+      name: (json['FolderName'] ?? '').toString().trim(),
       iconName: json['IconName'] ?? '',
       colorValue: json['ColorValue'] ?? '',
       sortOrder: json['SortOrder'] ?? 0,
@@ -35,11 +35,11 @@ class FolderModel {
   }
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "iconName": iconName,
-    "colorValue": colorValue,
-    "sortOrder": sortOrder,
+    "FolderId": id,
+    "FolderName": name,
+    "IconName": iconName,
+    "ColorValue": colorValue,
+    "SortOrder": sortOrder,
   };
 
   IconData get icon {

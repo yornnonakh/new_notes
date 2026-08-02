@@ -15,7 +15,15 @@ class SplashController extends GetxController {
     // Elegant delay for the splash animation to finish
     await Future.delayed(const Duration(milliseconds: 3500));
     
-    // Forcing onboarding to show after splash as requested
-    Get.offAllNamed(Routes.ONBOARDING);
+    final bool isFirstTime = _storage.read('isFirstTime') ?? true;
+    final String? token = _storage.read('token');
+
+    if (isFirstTime) {
+      Get.offAllNamed(Routes.ONBOARDING);
+    } else if (token == null) {
+      Get.offAllNamed(Routes.LOGIN);
+    } else {
+      Get.offAllNamed(Routes.FOLDER);
+    }
   }
 }

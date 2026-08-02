@@ -75,14 +75,19 @@ class NoteDetailView extends GetView<NoteController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Left: Back button
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: Get.back,
-                  icon: const Icon(
-                    CupertinoIcons.chevron_left,
-                    color: AppTheme.folderYellow,
-                    size: 28,
+                LiquidGlassContainer(
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: Get.back,
+                    icon: const Icon(
+                      CupertinoIcons.chevron_left,
+                      color: AppTheme.textSecondary,
+                      size: 28,
+                    ),
                   ),
                 ),
 
@@ -90,25 +95,28 @@ class NoteDetailView extends GetView<NoteController> {
                 Row(
                   children: [
                     _topBarIcon(context, CupertinoIcons.arrow_uturn_left, onTap: () {}),
-                    const SizedBox(width: 22),
+                    const SizedBox(width: 12),
                     _topBarIcon(context, CupertinoIcons.share, onTap: () {}),
-                    const SizedBox(width: 22),
+                    const SizedBox(width: 12),
                     _topBarIcon(context, CupertinoIcons.ellipsis_circle, onTap: () {}),
-                    const SizedBox(width: 22),
-                    GestureDetector(
-                      onTap: controller.saveNote,
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.folderYellow,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            CupertinoIcons.checkmark,
-                            color: Colors.white,
-                            size: 18,
+                    const SizedBox(width: 12),
+                    LiquidGlassContainer(
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      child: GestureDetector(
+                        onTap: controller.saveNote,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: AppTheme.folderYellow,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              CupertinoIcons.checkmark,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -124,22 +132,35 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _topBarIcon(BuildContext context, IconData icon, {required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(
-        icon,
-        color: AppTheme.folderYellow,
-        size: 24,
+    return LiquidGlassContainer(
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Center(
+          child: Icon(
+            icon,
+            color: AppTheme.textSecondary,
+            size: 22,
+          ),
+        ),
       ),
     );
   }
 
   Widget _toolbarIcon(BuildContext context, {required IconData icon, required VoidCallback onTap}) {
     final theme = Theme.of(context);
-    return IconButton(
-      padding: EdgeInsets.zero,
-      onPressed: onTap,
-      icon: Icon(icon, color: theme.colorScheme.onSurface, size: 24),
+    return LiquidGlassContainer(
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      opacity: 0.1,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: onTap,
+        icon: Icon(icon, color: theme.colorScheme.onSurface, size: 22),
+      ),
     );
   }
 

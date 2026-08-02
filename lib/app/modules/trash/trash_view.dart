@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/note_model.dart';
@@ -13,31 +15,37 @@ class TrashView extends GetView<TrashController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        top: false, // Allow background to reach the very top
-        bottom: false,
-        child: CustomScrollView(
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: theme.brightness == Brightness.dark 
+          ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent) 
+          : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
+        body: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // SliverAppBar with Dynamic Title Transition (Large to Small)
             SliverAppBar(
-              backgroundColor: theme.scaffoldBackgroundColor,
+              backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               pinned: true,
-              expandedHeight: 120.0,
+              expandedHeight: 140.0,
               elevation: 0,
               automaticallyImplyLeading: false,
               centerTitle: true,
+              systemOverlayStyle: theme.brightness == Brightness.dark 
+                  ? SystemUiOverlayStyle.light 
+                  : SystemUiOverlayStyle.dark,
               // Centered small title (visible when collapsed)
               title: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                   final opacity = (1.0 - percentage).clamp(0.0, 1.0);
                   
                   return Opacity(
-                    opacity: opacity.clamp(0.0, 1.0),
+                    opacity: opacity > 0.8 ? 1.0 : 0.0,
                     child: Text(
                       "Trash",
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -55,7 +63,7 @@ class TrashView extends GetView<TrashController> {
                   borderRadius: 22,
                   child: IconButton(
                     onPressed: () => Get.back(),
-                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
+                    icon: const Icon(CupertinoIcons.chevron_left, color: AppTheme.textSecondary, size: 28),
                     padding: EdgeInsets.zero,
                   ),
                 ),
@@ -109,11 +117,11 @@ class TrashView extends GetView<TrashController> {
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                centerTitle: false,
+                titlePadding: const EdgeInsets.fromLTRB(20, 0, 16, 12),
                 title: LayoutBuilder(
                   builder: (context, constraints) {
-                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                     return Opacity(
                       opacity: percentage.clamp(0.0, 1.0),
                       child: Text(
@@ -173,8 +181,8 @@ class TrashView extends GetView<TrashController> {
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
+        bottomNavigationBar: Obx(() => controller.isEditing.value ? _buildEditBottomBar(context) : const SizedBox.shrink()),
       ),
-      bottomNavigationBar: Obx(() => controller.isEditing.value ? _buildEditBottomBar(context) : const SizedBox.shrink()),
     );
   }
 
