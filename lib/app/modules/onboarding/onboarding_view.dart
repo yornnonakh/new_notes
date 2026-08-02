@@ -9,8 +9,11 @@ class OnboardingView extends GetView<OnboardingController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           PageView.builder(
@@ -28,11 +31,11 @@ class OnboardingView extends GetView<OnboardingController> {
                       height: 280,
                       width: 280,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.05),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -50,20 +53,15 @@ class OnboardingView extends GetView<OnboardingController> {
                     Text(
                       page.title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
+                      style: theme.textTheme.headlineLarge?.copyWith(fontSize: 32),
                     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
                     const SizedBox(height: 20),
                     Text(
                       page.description,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 17,
-                        color: AppTheme.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                         height: 1.5,
                       ),
                     ).animate().fadeIn(delay: 400.ms),
@@ -91,7 +89,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       decoration: BoxDecoration(
                         color: controller.currentPage.value == index 
                             ? AppTheme.folderYellow 
-                            : AppTheme.textGrey.withValues(alpha: 0.3),
+                            : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

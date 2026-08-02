@@ -9,8 +9,9 @@ class SplashView extends GetView<SplashController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,11 +19,15 @@ class SplashView extends GetView<SplashController> {
             Container(
               width: 120,
               height: 120,
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10)),
+                  BoxShadow(
+                    color: theme.brightness == Brightness.dark ? Colors.black26 : Colors.black12, 
+                    blurRadius: 20, 
+                    offset: const Offset(0, 10),
+                  ),
                 ],
               ),
               child: const Icon(
@@ -37,14 +42,9 @@ class SplashView extends GetView<SplashController> {
             
             const SizedBox(height: 32),
             
-            const Text(
+            Text(
               "Piisiit Note",
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-                letterSpacing: 1.2,
-              ),
+              style: theme.textTheme.headlineLarge?.copyWith(fontSize: 32, letterSpacing: 1.2),
             )
             .animate()
             .fadeIn(delay: 500.ms)
