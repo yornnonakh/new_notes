@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/note_model.dart';
@@ -20,36 +21,41 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        top: false, // Allow background to reach the very top
-        bottom: false,
-        child: CustomScrollView(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: theme.brightness == Brightness.dark 
+          ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent) 
+          : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
+        body: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // SliverAppBar with Dynamic iOS Transition
             SliverAppBar(
-              backgroundColor: theme.scaffoldBackgroundColor,
+              backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               pinned: true,
-              expandedHeight: 120.0,
+              expandedHeight: 140.0,
               elevation: 0,
               automaticallyImplyLeading: false,
               centerTitle: true,
-              // Small centered title
+              systemOverlayStyle: theme.brightness == Brightness.dark 
+                  ? SystemUiOverlayStyle.light 
+                  : SystemUiOverlayStyle.dark,
+              // Centered small title (visible when collapsed)
               title: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                   final opacity = (1.0 - percentage).clamp(0.0, 1.0);
                   
                   return Opacity(
-                    opacity: opacity.clamp(0.0, 1.0),
+                    opacity: opacity > 0.8 ? 1.0 : 0.0,
                     child: Text(
                       "Recently Deleted",
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                        fontSize: 17,
                       ),
                     ),
                   );
@@ -62,7 +68,7 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
                   borderRadius: 22,
                   child: IconButton(
                     onPressed: () => Get.back(),
-                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
+                    icon: const Icon(CupertinoIcons.chevron_left, color: AppTheme.textSecondary, size: 28),
                     padding: EdgeInsets.zero,
                   ),
                 ),
@@ -117,17 +123,17 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
               ],
               flexibleSpace: FlexibleSpaceBar(
                 centerTitle: true,
-                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                titlePadding: const EdgeInsets.fromLTRB(20, 0, 16, 12),
                 title: LayoutBuilder(
                   builder: (context, constraints) {
-                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                     return Opacity(
                       opacity: percentage.clamp(0.0, 1.0),
                       child: Text(
                         "Recently Deleted",
                         style: theme.textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 25,
+                          fontSize: 27,
                         ),
                       ),
                     );
@@ -209,10 +215,10 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
             const SliverToBoxAdapter(child: SizedBox(height: 112)),
           ],
         ),
+        bottomNavigationBar: Obx(() => controller.isEditing.value 
+          ? _buildEditBottomBar(context) 
+          : _buildSearchBottomBar(context)),
       ),
-      bottomNavigationBar: Obx(() => controller.isEditing.value 
-        ? _buildEditBottomBar(context) 
-        : _buildSearchBottomBar(context)),
     );
   }
 

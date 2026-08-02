@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/folder_model.dart';
@@ -24,27 +26,32 @@ class NoteListView extends GetView<NoteController> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        top: false, // Allow background to reach the very top
-        bottom: false,
-        child: CustomScrollView(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: theme.brightness == Brightness.dark 
+          ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent) 
+          : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
+        body: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // SliverAppBar with Dynamic iOS Transition
             SliverAppBar(
-              backgroundColor: theme.scaffoldBackgroundColor,
+              backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               pinned: true,
-              expandedHeight: 120.0,
+              expandedHeight: 140.0,
               elevation: 0,
               automaticallyImplyLeading: false,
               centerTitle: true,
+              systemOverlayStyle: theme.brightness == Brightness.dark 
+                  ? SystemUiOverlayStyle.light 
+                  : SystemUiOverlayStyle.dark,
               // Small centered title
               title: LayoutBuilder(
                 builder: (context, constraints) {
-                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                   final opacity = (1.0 - percentage).clamp(0.0, 1.0);
                   
                   return Opacity(
@@ -63,9 +70,10 @@ class NoteListView extends GetView<NoteController> {
                 child: LiquidGlassContainer(
                   width: 44,
                   height: 44,
+                  borderRadius: 22,
                   child: IconButton(
                     onPressed: () => Get.back(),
-                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 36),
+                    icon: const Icon(CupertinoIcons.chevron_left, color: AppTheme.textSecondary, size: 28),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -77,16 +85,23 @@ class NoteListView extends GetView<NoteController> {
                   padding: const EdgeInsets.only(right: 16),
                   child: Obx(() {
                     if (controller.isEditing.value) {
-                      return GestureDetector(
-                        onTap: controller.toggleEditing,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppTheme.folderYellow,
+                      return LiquidGlassContainer(
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        child: GestureDetector(
+                          onTap: controller.toggleEditing,
+                          child: Center(
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppTheme.folderYellow,
+                              ),
+                              child: const Icon(Icons.check, color: Colors.white, size: 20),
+                            ),
                           ),
-                          child: const Icon(Icons.check, color: Colors.white, size: 20),
                         ),
                       );
                     }
@@ -99,11 +114,12 @@ class NoteListView extends GetView<NoteController> {
                       child: LiquidGlassContainer(
                         width: 44,
                         height: 44,
+                        borderRadius: 22,
                         child: Center(
                             child: Icon(
-                              Icons.more_horiz,
-                              color: theme.colorScheme.onSurface,
-                              size: 20,
+                              CupertinoIcons.ellipsis_circle,
+                              color: AppTheme.textSecondary,
+                              size: 24,
                             ),
                           ),
                         ),
@@ -113,10 +129,10 @@ class NoteListView extends GetView<NoteController> {
               ],
               flexibleSpace: FlexibleSpaceBar(
                 centerTitle: false,
-                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                titlePadding: const EdgeInsets.fromLTRB(20, 0, 16, 12),
                 title: LayoutBuilder(
                   builder: (context, constraints) {
-                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (140.0 - kToolbarHeight);
                     return Opacity(
                       opacity: percentage.clamp(0.0, 1.0),
                       child: Text(
@@ -196,13 +212,13 @@ class NoteListView extends GetView<NoteController> {
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
+        bottomNavigationBar: Obx(() {
+          if (controller.isEditing.value) {
+            return _buildEditBottomBar(context, folder);
+          }
+          return _buildBottomBar(context, folder);
+        }),
       ),
-      bottomNavigationBar: Obx(() {
-        if (controller.isEditing.value) {
-          return _buildEditBottomBar(context, folder);
-        }
-        return _buildBottomBar(context, folder);
-      }),
     );
   }
 

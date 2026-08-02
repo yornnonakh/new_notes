@@ -17,7 +17,7 @@ class FolderService extends GetxService {
 
   Future<void> deleteRestoreFolder(int id, bool isDelete) async {
     await _api.dio.post("/api/folder/delete-restore", data: {
-      "id": id,
+      "FolderId": id,
       "isDelete": isDelete,
     });
   }

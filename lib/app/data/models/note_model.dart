@@ -25,7 +25,7 @@ class NoteModel {
   });
 
   factory NoteModel.fromJson(Map<String, dynamic> json) {
-    var contentData = json['content'];
+    var contentData = json['Content'] ?? json['content'];
     List<NoteBlock> parsedContent = [];
     
     if (contentData is List) {
@@ -55,13 +55,13 @@ class NoteModel {
   }
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "folderId": folderId,
-    "title": title,
-    "content": content.map((e) => e.toJson()).toList(),
-    "isPinned": isPinned,
-    "isArchived": isArchived,
-    "isLocked": isLocked,
+    "NoteId": id,
+    "FolderId": folderId,
+    "Title": title,
+    "Content": jsonEncode(content.map((e) => e.toJson()).toList()),
+    "IsPinned": isPinned,
+    "IsArchived": isArchived,
+    "IsLocked": isLocked,
   };
 }
 
