@@ -16,26 +16,55 @@ class TrashView extends GetView<TrashController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
+        top: false, // Allow background to reach the very top
         bottom: false,
-        child: Column(
-          children: [
-            // Sticky Top Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  LiquidGlassContainer(
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    child: IconButton(
-                      onPressed: () => Get.back(),
-                      icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
-                      padding: EdgeInsets.zero,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // SliverAppBar with Dynamic Title Transition (Large to Small)
+            SliverAppBar(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              pinned: true,
+              expandedHeight: 120.0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              // Centered small title (visible when collapsed)
+              title: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final opacity = (1.0 - percentage).clamp(0.0, 1.0);
+                  
+                  return Opacity(
+                    opacity: opacity.clamp(0.0, 1.0),
+                    child: Text(
+                      "Trash",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                      ),
                     ),
+                  );
+                },
+              ),
+              leading: Center(
+                child: LiquidGlassContainer(
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  child: IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 30),
+                    padding: EdgeInsets.zero,
                   ),
-                  Obx(() => controller.isEditing.value
+                ),
+              ),
+              leadingWidth: 70,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Obx(() => controller.isEditing.value
                     ? LiquidGlassContainer(
                         width: 44,
                         height: 44,
@@ -77,66 +106,71 @@ class TrashView extends GetView<TrashController> {
                         ),
                       ),
                   ),
-                ],
-              ),
-            ),
-            
-            // Full-Width Body
-            Expanded(
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Trash", style: theme.textTheme.headlineLarge),
-                          Obx(() => Text("${controller.trashNotes.length + controller.trashFolders.length} Items", 
-                            style: theme.textTheme.bodySmall)),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Obx(() {
-                    if (controller.isLoading.value) {
-                      return SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
-                    }
-
-                    if (controller.trashNotes.isEmpty && controller.trashFolders.isEmpty) {
-                      return SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: Text("No items in trash", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
-                      );
-                    }
-
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverToBoxAdapter(
-                        child: GlassCard(
-                          borderRadius: 20,
-                          children: [
-                            for (int i = 0; i < controller.trashFolders.length; i++) ...[
-                              _buildFolderTile(context, controller.trashFolders[i]),
-                              const Divider(indent: 56, height: 1),
-                            ],
-                            for (int i = 0; i < controller.trashNotes.length; i++) ...[
-                              _buildNoteTile(context, controller.trashNotes[i]),
-                              if (i < controller.trashNotes.length - 1)
-                                const Divider(indent: 56, height: 1),
-                            ],
-                          ],
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
+                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    return Opacity(
+                      opacity: percentage.clamp(0.0, 1.0),
+                      child: Text(
+                        "Trash",
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 34,
                         ),
                       ),
                     );
-                  }),
-                  
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                ],
+                  },
+                ),
               ),
             ),
+            
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Obx(() => Text("${controller.trashNotes.length + controller.trashFolders.length} Items", 
+                  style: theme.textTheme.bodySmall)),
+              ),
+            ),
+
+            Obx(() {
+              if (controller.isLoading.value) {
+                return SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
+              }
+
+              if (controller.trashNotes.isEmpty && controller.trashFolders.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: Text("No items in trash", style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+                );
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverToBoxAdapter(
+                  child: GlassCard(
+                    borderRadius: 20,
+                    children: [
+                      for (int i = 0; i < controller.trashFolders.length; i++) ...[
+                        _buildFolderTile(context, controller.trashFolders[i]),
+                        const Divider(indent: 56, height: 1),
+                      ],
+                      for (int i = 0; i < controller.trashNotes.length; i++) ...[
+                        _buildNoteTile(context, controller.trashNotes[i]),
+                        if (i < controller.trashNotes.length - 1)
+                          const Divider(indent: 56, height: 1),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
+            
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),

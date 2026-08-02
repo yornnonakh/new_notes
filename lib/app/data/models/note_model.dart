@@ -65,7 +65,7 @@ class NoteModel {
   };
 }
 
-enum BlockType { text, checklist, attachment }
+enum BlockType { text, checklist, attachment, table, drawing }
 
 abstract class NoteBlock {
   final String id;
@@ -78,20 +78,74 @@ abstract class NoteBlock {
     if (type == 'text') return TextBlock.fromJson(json);
     if (type == 'checklist') return ChecklistBlock.fromJson(json);
     if (type == 'attachment') return AttachmentBlock.fromJson(json);
+    if (type == 'table') return TableBlock.fromJson(json);
+    if (type == 'drawing') return DrawingBlock.fromJson(json);
     throw Exception('Unknown block type: $type');
   }
 
   Map<String, dynamic> toJson();
 }
 
+class DrawingBlock extends NoteBlock {
+  final String? localPath;
+  final String? url;
+
+  DrawingBlock({required String id, this.localPath, this.url}) 
+      : super(id: id, type: BlockType.drawing);
+
+  factory DrawingBlock.fromJson(Map<String, dynamic> json) {
+    return DrawingBlock(
+      id: json['id'],
+      localPath: json['localPath'],
+      url: json['url'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "type": "drawing",
+    "localPath": localPath,
+    "url": url,
+  };
+}
+
+class TableBlock extends NoteBlock {
+  final List<List<String>> rows;
+
+  TableBlock({required String id, required this.rows}) 
+      : super(id: id, type: BlockType.table);
+
+  factory TableBlock.fromJson(Map<String, dynamic> json) {
+    return TableBlock(
+      id: json['id'],
+      rows: (json['rows'] as List? ?? [])
+          .map((row) => (row as List).map((cell) => cell.toString()).toList())
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "type": "table",
+    "rows": rows,
+  };
+}
+
 class TextBlock extends NoteBlock {
   final String text;
+  final String style; // 'title', 'heading', 'body'
 
-  TextBlock({required String id, required this.text}) 
+  TextBlock({required String id, required this.text, this.style = 'body'}) 
       : super(id: id, type: BlockType.text);
 
   factory TextBlock.fromJson(Map<String, dynamic> json) {
-    return TextBlock(id: json['id'], text: json['text'] ?? '');
+    return TextBlock(
+      id: json['id'], 
+      text: json['text'] ?? '',
+      style: json['style'] ?? 'body',
+    );
   }
 
   @override
@@ -99,6 +153,7 @@ class TextBlock extends NoteBlock {
     "id": id,
     "type": "text",
     "text": text,
+    "style": style,
   };
 }
 

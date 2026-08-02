@@ -12,22 +12,10 @@ class SplashController extends GetxController {
   }
 
   void _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3));
+    // Elegant delay for the splash animation to finish
+    await Future.delayed(const Duration(milliseconds: 3500));
     
-    // TEMPORARILY FORCING ONBOARDING FOR VISUAL VERIFICATION
+    // Forcing onboarding to show after splash as requested
     Get.offAllNamed(Routes.ONBOARDING);
-    return;
-    
-    // ignore: dead_code
-    bool isFirstTime = _storage.read('isFirstTime') ?? true;
-    String? token = _storage.read('token');
-
-    if (isFirstTime) {
-      Get.offAllNamed(Routes.ONBOARDING);
-    } else if (token == null) {
-      Get.offAllNamed(Routes.LOGIN);
-    } else {
-      Get.offAllNamed(Routes.FOLDER);
-    }
   }
 }

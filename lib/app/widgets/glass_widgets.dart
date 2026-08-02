@@ -35,9 +35,6 @@ class LiquidGlassContainer extends StatelessWidget {
           height: height,
           padding: padding,
           decoration: BoxDecoration(
-            color: isDark 
-                ? Colors.white.withValues(alpha: 0.1) 
-                : AppTheme.cardColor.withValues(alpha: opacity),
             borderRadius: BorderRadius.circular(borderRadius),
             border: isDark 
                 ? null 
@@ -46,7 +43,14 @@ class LiquidGlassContainer extends StatelessWidget {
                     width: 0.5,
                   ),
           ),
-          child: child,
+          child: Material(
+            color: isDark 
+                ? Colors.white.withValues(alpha: 0.1) 
+                : AppTheme.cardColor.withValues(alpha: opacity),
+            borderRadius: BorderRadius.circular(borderRadius),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/models/note_model.dart';
@@ -14,7 +15,6 @@ import '../../theme/app_theme.dart';
 class NoteDetailView extends GetView<NoteController> {
   const NoteDetailView({super.key});
 
-  static const String _displayFont = 'CupertinoSystemDisplay';
   static const double _maxContentWidth = 600;
 
   @override
@@ -26,31 +26,33 @@ class NoteDetailView extends GetView<NoteController> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _buildTopBar(context),
-              Expanded(
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: theme.primaryColor,
-                      ),
-                    );
-                  }
-
-                  return _buildEditor(context);
-                }),
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: Obx(
-          () => controller.isLoading.value
-              ? const SizedBox.shrink()
-              : _buildEditingToolbar(context),
+        body: Column(
+          children: [
+            // Sticky Top Bar with Background (covers status bar)
+            _buildTopBar(context),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: theme.primaryColor,
+                    ),
+                  );
+                }
+        
+                return Stack(
+                  children: [
+                    _buildEditor(context),
+                    // The toolbar is now positioned relative to the keyboard
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: _buildEditingToolbar(context),
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );
@@ -58,49 +60,46 @@ class NoteDetailView extends GetView<NoteController> {
 
   Widget _buildTopBar(BuildContext context) {
     final theme = Theme.of(context);
+    final topPadding = MediaQuery.of(context).padding.top;
     final controlSize = 40.0;
 
-    return _pageContent(
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: SizedBox(
-          height: controlSize,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Left: Back button
-              LiquidGlassContainer(
-                width: controlSize,
-                height: controlSize,
-                borderRadius: controlSize / 2,
-                child: IconButton(
+    return Container(
+      color: theme.scaffoldBackgroundColor,
+      padding: EdgeInsets.only(top: topPadding),
+      child: _pageContent(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SizedBox(
+            height: controlSize,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Left: Back button
+                IconButton(
                   padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   onPressed: Get.back,
-                  icon: Icon(
+                  icon: const Icon(
                     CupertinoIcons.chevron_left,
                     color: AppTheme.folderYellow,
-                    size: 24,
+                    size: 28,
                   ),
                 ),
-              ),
 
-              // Right: Undo, Share, More, Done
-              Row(
-                children: [
-                  _circleAction(context, CupertinoIcons.arrow_counterclockwise, onTap: () {}),
-                  const SizedBox(width: 8),
-                  _circleAction(context, CupertinoIcons.share, onTap: () {}),
-                  const SizedBox(width: 8),
-                  _circleAction(context, CupertinoIcons.ellipsis, onTap: () {}),
-                  const SizedBox(width: 8),
-                  LiquidGlassContainer(
-                    width: controlSize,
-                    height: controlSize,
-                    borderRadius: controlSize / 2,
-                    opacity: 1.0, 
-                    child: GestureDetector(
+                // Right Actions: Undo, Share, More, Done
+                Row(
+                  children: [
+                    _topBarIcon(context, CupertinoIcons.arrow_uturn_left, onTap: () {}),
+                    const SizedBox(width: 22),
+                    _topBarIcon(context, CupertinoIcons.share, onTap: () {}),
+                    const SizedBox(width: 22),
+                    _topBarIcon(context, CupertinoIcons.ellipsis_circle, onTap: () {}),
+                    const SizedBox(width: 22),
+                    GestureDetector(
                       onTap: controller.saveNote,
                       child: Container(
+                        width: 32,
+                        height: 32,
                         decoration: const BoxDecoration(
                           color: AppTheme.folderYellow,
                           shape: BoxShape.circle,
@@ -109,52 +108,38 @@ class NoteDetailView extends GetView<NoteController> {
                           child: Icon(
                             CupertinoIcons.checkmark,
                             color: Colors.white,
-                            size: 20,
+                            size: 18,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _circleAction(BuildContext context, IconData icon, {required VoidCallback onTap}) {
-    final theme = Theme.of(context);
-    return LiquidGlassContainer(
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Center(
-          child: Icon(
-            icon,
-            color: theme.colorScheme.onSurface,
-            size: 20,
-          ),
-        ),
+  Widget _topBarIcon(BuildContext context, IconData icon, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Icon(
+        icon,
+        color: AppTheme.folderYellow,
+        size: 24,
       ),
     );
   }
 
   Widget _toolbarIcon(BuildContext context, {required IconData icon, required VoidCallback onTap}) {
     final theme = Theme.of(context);
-    return LiquidGlassContainer(
-      width: 38,
-      height: 38,
-      borderRadius: 19,
-      opacity: 0.1, 
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        onPressed: onTap,
-        icon: Icon(icon, color: theme.colorScheme.onSurface, size: 22),
-      ),
+    return IconButton(
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
+      icon: Icon(icon, color: theme.colorScheme.onSurface, size: 24),
     );
   }
 
@@ -166,36 +151,46 @@ class NoteDetailView extends GetView<NoteController> {
     return _pageContent(
       ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(horizontalInset, 8, horizontalInset, 28),
+        padding: EdgeInsets.fromLTRB(horizontalInset, 8, horizontalInset, 120),
         children: [
           Center(
             child: Text(
               DateFormat("MMMM d, yyyy 'at' h:mm a").format(noteDate),
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                fontSize: 13,
+              ),
             ),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: 16),
           TextField(
             key: const ValueKey('note-title-field'),
             controller: controller.titleController,
+            onTap: () => controller.activeBlockIndex = -1,
             cursorColor: AppTheme.folderYellow,
             cursorWidth: 1.5,
             maxLines: null,
             keyboardType: TextInputType.multiline,
             textCapitalization: TextCapitalization.sentences,
-            scrollPadding: const EdgeInsets.only(bottom: 92),
-            style: theme.textTheme.headlineLarge,
+            style: theme.textTheme.headlineLarge?.copyWith(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
             decoration: InputDecoration(
               hintText: 'Title',
-              hintStyle: theme.textTheme.headlineLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+              hintStyle: theme.textTheme.headlineLarge?.copyWith(
+                fontSize: 32,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+              ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               isCollapsed: true,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           for (final entry in controller.blocks.asMap().entries)
             _buildBlock(context, entry.value, entry.key),
         ],
@@ -208,11 +203,24 @@ class NoteDetailView extends GetView<NoteController> {
     if (block is TextBlock) {
       final textController = controller.getTextController(block.id, block.text);
 
+      TextStyle? textStyle;
+      switch (block.style) {
+        case 'title':
+          textStyle = theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold);
+          break;
+        case 'heading':
+          textStyle = theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold);
+          break;
+        default:
+          textStyle = theme.textTheme.bodyLarge?.copyWith(height: 1.45);
+      }
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: TextField(
           key: ValueKey('note-text-${block.id}'),
           controller: textController,
+          onTap: () => controller.activeBlockIndex = blockIndex,
           cursorColor: AppTheme.folderYellow,
           cursorWidth: 1.5,
           maxLines: null,
@@ -220,10 +228,10 @@ class NoteDetailView extends GetView<NoteController> {
           textCapitalization: TextCapitalization.sentences,
           scrollPadding: const EdgeInsets.only(bottom: 92),
           onChanged: (value) => controller.updateTextBlock(blockIndex, value),
-          style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
+          style: textStyle,
           decoration: InputDecoration(
             hintText: 'Start writing...',
-            hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+            hintStyle: textStyle?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -241,7 +249,52 @@ class NoteDetailView extends GetView<NoteController> {
       return _buildAttachmentBlock(context, block);
     }
 
+    if (block is TableBlock) {
+      return _buildTableBlock(context, block);
+    }
+
+    if (block is DrawingBlock) {
+      return _buildDrawingBlock(context, block);
+    }
+
     return const SizedBox.shrink();
+  }
+
+  Widget _buildDrawingBlock(BuildContext context, DrawingBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: InteractiveDrawingCanvas(
+        onSave: (path) {
+          // Logic handled in controller
+        },
+      ),
+    );
+  }
+
+  Widget _buildTableBlock(BuildContext context, TableBlock block) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.dividerColor, width: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Table(
+        border: TableBorder.all(color: theme.dividerColor, width: 0.5),
+        children: [
+          for (final row in block.rows)
+            TableRow(
+              children: [
+                for (final cell in row)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(cell, style: theme.textTheme.bodyMedium),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildChecklistBlock(
@@ -390,74 +443,79 @@ class NoteDetailView extends GetView<NoteController> {
 
   Widget _buildEditingToolbar(BuildContext context) {
     final theme = Theme.of(context);
-    const controlHeight = 50.0;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bool isKeyboardVisible = bottomInset > 0;
 
-    return ColoredBox(
+    return Material(
       color: theme.scaffoldBackgroundColor,
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.only(bottom: 12),
-        child: _pageContent(
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Left Floating Pill (Checklist, Attachment, Drawing)
-                Container(
-                  height: controlHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      _toolbarIcon(
-                        context,
-                        icon: Icons.checklist_rtl_rounded,
-                        onTap: controller.addChecklistBlock,
-                      ),
-                      const SizedBox(width: 4),
-                      _toolbarIcon(
-                        context,
-                        icon: CupertinoIcons.paperclip,
-                        onTap: () {},
-                      ),
-                      const SizedBox(width: 4),
-                      _toolbarIcon(
-                        context,
-                        icon: CupertinoIcons.pencil_outline,
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Right Floating Circle (New note / Edit button)
-                LiquidGlassContainer(
-                  width: controlHeight,
-                  height: controlHeight,
-                  borderRadius: controlHeight / 2,
-                  child: GestureDetector(
-                    onTap: controller.saveNote,
-                    child: Center(
-                      child: Icon(
-                        CupertinoIcons.square_pencil,
-                        color: theme.colorScheme.onSurface,
-                        size: 24,
-                      ),
+      child: Container(
+        padding: EdgeInsets.only(bottom: isKeyboardVisible ? 0 : 12),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: _pageContent(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: isKeyboardVisible ? MainAxisAlignment.spaceAround : MainAxisAlignment.start,
+                      children: [
+                        _toolbarIcon(
+                          context,
+                          icon: CupertinoIcons.textformat, // "Aa"
+                          onTap: () => _showFormattingPopup(context),
+                        ),
+                        if (!isKeyboardVisible) const SizedBox(width: 24),
+                        _toolbarIcon(
+                          context,
+                          icon: CupertinoIcons.list_bullet, // Checklist
+                          onTap: controller.addChecklistBlock,
+                        ),
+                        if (!isKeyboardVisible) const SizedBox(width: 24),
+                        _toolbarIcon(
+                          context,
+                          icon: CupertinoIcons.table, // Table
+                          onTap: controller.addTableBlock,
+                        ),
+                        if (!isKeyboardVisible) const SizedBox(width: 24),
+                        _toolbarIcon(
+                          context,
+                          icon: CupertinoIcons.paperclip, // Attachment
+                          onTap: () => _showAttachmentPopup(context),
+                        ),
+                        if (!isKeyboardVisible) const SizedBox(width: 24),
+                        _toolbarIcon(
+                          context,
+                          icon: CupertinoIcons.pencil_circle, // Markup (pencil circle)
+                          onTap: controller.addDrawingBlock,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+
+                  if (!isKeyboardVisible)
+                    LiquidGlassContainer(
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: const Center(
+                          child: Icon(
+                            CupertinoIcons.square_pencil,
+                            color: AppTheme.folderYellow,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -476,7 +534,159 @@ class NoteDetailView extends GetView<NoteController> {
     );
   }
 
+  void _showAttachmentPopup(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text("Attachment"),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              controller.addAttachment(ImageSource.camera);
+            },
+            child: const Text("Take Photo"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              controller.addAttachment(ImageSource.gallery);
+            },
+            child: const Text("Photo Library"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              controller.addAttachment(ImageSource.camera, isVideo: true);
+            },
+            child: const Text("Take Video"),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Get.back(),
+          isDefaultAction: true,
+          child: const Text("Cancel"),
+        ),
+      ),
+    );
+  }
+
+  void _showFormattingPopup(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text("Text Format"),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              int index = controller.blocks.length - 1;
+              controller.updateTextBlockStyle(index, 'title');
+            },
+            child: const Text("Title"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              int index = controller.blocks.length - 1;
+              controller.updateTextBlockStyle(index, 'heading');
+            },
+            child: const Text("Heading"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              int index = controller.blocks.length - 1;
+              controller.updateTextBlockStyle(index, 'body');
+            },
+            child: const Text("Body"),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Get.back(),
+          isDefaultAction: true,
+          child: const Text("Cancel"),
+        ),
+      ),
+    );
+  }
+
   double _editorInset(BuildContext context) {
     return (MediaQuery.sizeOf(context).width * 0.065).clamp(21.0, 32.0);
   }
+}
+
+class InteractiveDrawingCanvas extends StatefulWidget {
+  final Function(String path)? onSave;
+  const InteractiveDrawingCanvas({super.key, this.onSave});
+
+  @override
+  State<InteractiveDrawingCanvas> createState() => _InteractiveDrawingCanvasState();
+}
+
+class _InteractiveDrawingCanvasState extends State<InteractiveDrawingCanvas> {
+  final List<Offset?> _points = [];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      height: 400,
+      width: double.infinity,
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                RenderBox renderBox = context.findRenderObject() as RenderBox;
+                _points.add(renderBox.globalToLocal(details.localPosition));
+              });
+            },
+            onPanEnd: (details) {
+              _points.add(null);
+            },
+            child: CustomPaint(
+              painter: DrawingPainter(points: _points, color: theme.colorScheme.onSurface),
+              size: Size.infinite,
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              onPressed: () => setState(() => _points.clear()),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DrawingPainter extends CustomPainter {
+  final List<Offset?> points;
+  final Color color;
+
+  DrawingPainter({required this.points, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = color
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 3.0;
+
+    for (int i = 0; i < points.length - 1; i++) {
+      if (points[i] != null && points[i + 1] != null) {
+        canvas.drawLine(points[i]!, points[i + 1]!, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(DrawingPainter oldDelegate) => true;
 }

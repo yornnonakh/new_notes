@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:new_note/app/widgets/glass_widgets.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/models/note_model.dart';
 import '../../routes/app_pages.dart';
+import '../../widgets/glass_widgets.dart';
 import 'note_controller.dart';
 import '../../theme/app_theme.dart';
 import 'widgets/note_context_menu.dart';
@@ -27,83 +27,118 @@ class NoteListView extends GetView<NoteController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
+        top: false, // Allow background to reach the very top
         bottom: false,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Top App Bar Actions
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    LiquidGlassContainer(
-                      width: 44,
-                      height: 44,
-                      child: IconButton(
-                        onPressed: () => Get.back(),
-                        icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 36),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+            // SliverAppBar with Dynamic iOS Transition
+            SliverAppBar(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              pinned: true,
+              expandedHeight: 120.0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              // Small centered title
+              title: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final opacity = (1.0 - percentage).clamp(0.0, 1.0);
+                  
+                  return Opacity(
+                    opacity: opacity > 0.8 ? 1.0 : 0.0,
+                    child: Text(
+                      folder.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
                       ),
                     ),
-                    Obx(() {
-                      if (controller.isEditing.value) {
-                        return GestureDetector(
-                          onTap: controller.toggleEditing,
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppTheme.folderYellow,
-                            ),
-                            child: const Icon(Icons.check, color: Colors.white, size: 20),
-                          ),
-                        );
-                      }
-
+                  );
+                },
+              ),
+              leading: Center(
+                child: LiquidGlassContainer(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 36),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+              ),
+              leadingWidth: 70,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Obx(() {
+                    if (controller.isEditing.value) {
                       return GestureDetector(
-                        onTap: () => Get.dialog(
-                          NoteContextMenu(controller: controller),
-                          barrierColor: Colors.black.withValues(alpha: 0.1),
+                        onTap: controller.toggleEditing,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.folderYellow,
+                          ),
+                          child: const Icon(Icons.check, color: Colors.white, size: 20),
                         ),
-                        child: LiquidGlassContainer(
-                          width: 44,
-                          height: 44,
-                          child: Center(
-                              child: Icon(
-                                Icons.more_horiz,
-                                color: theme.colorScheme.onSurface,
-                                size: 20,
-                              ),
+                      );
+                    }
+
+                    return GestureDetector(
+                      onTap: () => Get.dialog(
+                        NoteContextMenu(controller: controller),
+                        barrierColor: Colors.black.withValues(alpha: 0.1),
+                      ),
+                      child: LiquidGlassContainer(
+                        width: 44,
+                        height: 44,
+                        child: Center(
+                            child: Icon(
+                              Icons.more_horiz,
+                              color: theme.colorScheme.onSurface,
+                              size: 20,
                             ),
                           ),
-                      );
-                    }),
-                  ],
+                        ),
+                    );
+                  }),
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    return Opacity(
+                      opacity: percentage.clamp(0.0, 1.0),
+                      child: Text(
+                        folder.name,
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 34,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
 
-            // Large Title Area
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      folder.name,
-                      style: theme.textTheme.headlineLarge,
-                    ),
-                    Obx(() => Text(
-                      "${controller.notes.length} Notes",
-                      style: theme.textTheme.bodySmall,
-                    )),
-                  ],
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Obx(() => Text(
+                  "${controller.notes.length} Notes",
+                  style: theme.textTheme.bodySmall,
+                )),
               ),
             ),
 
@@ -241,7 +276,6 @@ class NoteListView extends GetView<NoteController> {
   }
 
   Widget _buildEditBottomBar(BuildContext context, FolderModel folder) {
-    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),

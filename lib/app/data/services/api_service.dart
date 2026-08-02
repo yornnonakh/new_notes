@@ -7,7 +7,7 @@ class ApiService extends GetxService {
   late Dio _dio;
   final _storage = GetStorage();
   
-  // Base URL for Piisiit Note API
+  // Base URL for  Note API
   static const String baseUrl = "https://note.piisiit.com"; 
 
   Dio get dio => _dio;

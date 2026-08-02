@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../data/models/folder_model.dart';
 import '../../routes/app_pages.dart';
 import '../../theme/app_theme.dart';
@@ -18,114 +17,159 @@ class FolderView extends GetView<FolderController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        bottom: true,
+        top: false, // Allow background to reach the very top
+        bottom: false,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Top App Bar Actions
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    LiquidGlassContainer(
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      child: IconButton(
-                        onPressed: () => Get.bottomSheet(
-                          FolderCreateModal(controller: controller),
-                          isScrollControlled: true,
-                        ),
-                        icon: Icon(Icons.create_new_folder_outlined, color: theme.colorScheme.onSurface, size: 24),
+            // SliverAppBar with Dynamic Title Transition (Large to Small)
+            SliverAppBar(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              pinned: true,
+              expandedHeight: 120.0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              // Centered small title (visible when collapsed)
+              title: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                  final opacity = (1.0 - percentage).clamp(0.0, 1.0);
+                  
+                  return Opacity(
+                    opacity: opacity > 0.8 ? 1.0 : 0.0,
+                    child: Text(
+                      "Folders",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Obx(() => controller.isEditing.value
-                        ? LiquidGlassContainer(
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            child: GestureDetector(
-                              onTap: controller.toggleEditing,
-                              child: Center(
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: AppTheme.folderYellow,
+                  );
+                },
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Row(
+                    children: [
+                      LiquidGlassContainer(
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        child: IconButton(
+                          onPressed: () => Get.bottomSheet(
+                            FolderCreateModal(controller: controller),
+                            isScrollControlled: true,
+                          ),
+                          icon: Icon(Icons.create_new_folder_outlined,
+                              color: theme.colorScheme.onSurface, size: 24),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Obx(() => controller.isEditing.value
+                          ? LiquidGlassContainer(
+                              width: 44,
+                              height: 44,
+                              borderRadius: 22,
+                              child: GestureDetector(
+                                onTap: controller.toggleEditing,
+                                child: Center(
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppTheme.folderYellow,
+                                    ),
+                                    child: const Icon(Icons.check,
+                                        color: Colors.white, size: 20),
                                   ),
-                                  child: const Icon(Icons.check, color: Colors.white, size: 20),
                                 ),
                               ),
-                            ),
-                          )
-                        : LiquidGlassContainer(
-                            height: 44,
-                            borderRadius: 22,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: TextButton(
-                              onPressed: controller.toggleEditing,
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                "Edit",
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w400,
+                            )
+                          : LiquidGlassContainer(
+                              height: 44,
+                              borderRadius: 22,
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: TextButton(
+                                onPressed: controller.toggleEditing,
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  "Edit",
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
-                            ),
-                          )),
-                  ],
+                            )),
+                    ],
+                  ),
+                ),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double percentage = (constraints.maxHeight - kToolbarHeight) / (120.0 - kToolbarHeight);
+                    return Opacity(
+                      opacity: percentage.clamp(0.0, 1.0),
+                      child: Text(
+                        "Folders",
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 34,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-
-            // Large Title
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                child: Text(
-                  "Folders",
-                  style: theme.textTheme.headlineLarge,
-                ),
-              ),
-            ),
-
             SliverToBoxAdapter(
               child: Obx(() {
                 if (controller.isLoading.value) {
                   return const SizedBox(
                     height: 200,
-                    child: Center(child: CircularProgressIndicator(color: AppTheme.folderYellow)),
+                    child: Center(
+                        child: CircularProgressIndicator(
+                            color: AppTheme.folderYellow)),
                   );
                 }
-
                 return Column(
                   children: [
-                    // iCloud Section (if any)
+                    const SizedBox(height: 12),
+                    // iCloud Section
                     if (controller.iCloudFolders.isNotEmpty) ...[
-                      _buildSectionHeader(context, "iCloud", controller.isICloudExpanded, controller.toggleICloud),
+                      _buildSectionHeader(context, "iCloud",
+                          controller.isICloudExpanded, controller.toggleICloud),
                       Obx(() => controller.isICloudExpanded.value
                           ? _buildFolderGroup(context, controller.iCloudFolders)
                           : const SizedBox.shrink()),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
                     ],
 
                     // On My iPhone Section
-                    _buildSectionHeader(context, "On My iPhone", controller.isOnMyiPhoneExpanded, controller.toggleOnMyiPhone),
+                    _buildSectionHeader(
+                        context,
+                        "On My iPhone",
+                        controller.isOnMyiPhoneExpanded,
+                        controller.toggleOnMyiPhone),
                     Obx(() => controller.isOnMyiPhoneExpanded.value
-                        ? _buildFolderGroup(context, controller.onMyiPhoneFolders, includeRecentlyDeleted: true)
+                        ? _buildFolderGroup(context, controller.onMyiPhoneFolders,
+                            includeRecentlyDeleted: true)
                         : const SizedBox.shrink()),
 
-                    const SizedBox(height: 100), // Padding for bottom bar
+                    const SizedBox(height: 120), // Bottom padding
                   ],
                 );
               }),
@@ -136,7 +180,6 @@ class FolderView extends GetView<FolderController> {
       bottomNavigationBar: _buildBottomBar(context),
     );
   }
-
   Widget _buildSectionHeader(BuildContext context, String title, RxBool isExpanded, VoidCallback onTap) {
     final theme = Theme.of(context);
     return Padding(
@@ -158,7 +201,6 @@ class FolderView extends GetView<FolderController> {
       ),
     );
   }
-
   Widget _buildFolderGroup(BuildContext context, List<FolderModel> folders, {bool includeRecentlyDeleted = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -195,16 +237,7 @@ class FolderView extends GetView<FolderController> {
           onTap: (isEditing && isSystem)
               ? null
               : () => Get.toNamed(Routes.NOTE_LIST, arguments: folder)?.then((value) => controller.fetchFolders()),
-          leading: LiquidGlassContainer(
-            width: 34,
-            height: 34,
-            borderRadius: 8,
-            opacity: 0.08,
-            blur: 15,
-            child: Center(
-              child: Icon(folder.icon, color: AppTheme.folderYellow, size: 20),
-            ),
-          ),
+          leading: Icon(folder.icon, color: AppTheme.folderYellow, size: 24),
           title: Text(folder.name, style: theme.textTheme.bodyLarge),
           trailing: isEditing && !isSystem
               ? Row(
@@ -251,16 +284,7 @@ class FolderView extends GetView<FolderController> {
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           onTap: isEditing ? null : () => Get.toNamed(Routes.RECENTLY_DELETED),
-          leading: LiquidGlassContainer(
-            width: 34,
-            height: 34,
-            borderRadius: 8,
-            opacity: 0.08,
-            blur: 15,
-            child: const Center(
-              child: Icon(Icons.delete_outline_rounded, color: AppTheme.folderYellow, size: 20),
-            ),
-          ),
+          leading: const Icon(Icons.delete_outline_rounded, color: AppTheme.folderYellow, size: 24),
           title: Text("Recently Deleted", style: theme.textTheme.bodyLarge),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

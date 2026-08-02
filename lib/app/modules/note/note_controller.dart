@@ -1,14 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../data/models/note_model.dart';
 import '../../data/services/folder_service.dart';
 import '../../data/services/note_service.dart';
-import '../../theme/app_theme.dart';
-
 import 'widgets/note_move_folder_modal.dart';
 
 class NoteController extends GetxController {
   final _noteService = Get.find<NoteService>();
+  final _picker = ImagePicker();
 
   final notes = <NoteModel>[].obs;
   final isLoading = true.obs;
@@ -21,6 +22,9 @@ class NoteController extends GetxController {
   final currentNote = Rxn<NoteModel>();
   final titleController = TextEditingController();
   final blocks = <NoteBlock>[].obs;
+  
+  // Track currently focused block index for insertions
+  int activeBlockIndex = -1;
   
   // Map to keep track of text controllers for each block to prevent focus loss
   final Map<String, TextEditingController> blockControllers = {};
@@ -199,7 +203,11 @@ class NoteController extends GetxController {
       if (blocks[i] is TextBlock) {
         final controller = blockControllers[blocks[i].id];
         if (controller != null) {
-          blocks[i] = TextBlock(id: blocks[i].id, text: controller.text);
+          blocks[i] = TextBlock(
+            id: blocks[i].id, 
+            text: controller.text,
+            style: (blocks[i] as TextBlock).style,
+          );
         }
       }
     }
@@ -244,16 +252,116 @@ class NoteController extends GetxController {
     }
   }
 
-  void addTextBlock() {
+  void addTextBlock({String style = 'body'}) {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
-    blocks.add(TextBlock(id: id, text: ""));
+    final block = TextBlock(id: id, text: "", style: style);
+    
+    if (activeBlockIndex >= 0 && activeBlockIndex < blocks.length) {
+      blocks.insert(activeBlockIndex + 1, block);
+      activeBlockIndex++;
+    } else {
+      blocks.add(block);
+      activeBlockIndex = blocks.length - 1;
+    }
   }
 
   void addChecklistBlock() {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
-    blocks.add(ChecklistBlock(id: id, items: [
+    final block = ChecklistBlock(id: id, items: [
       ChecklistItem(id: "1", text: "")
-    ]));
+    ]);
+
+    if (activeBlockIndex >= 0 && activeBlockIndex < blocks.length) {
+      blocks.insert(activeBlockIndex + 1, block);
+      activeBlockIndex++;
+    } else {
+      blocks.add(block);
+      activeBlockIndex = blocks.length - 1;
+    }
+  }
+
+  Future<void> addAttachment(ImageSource source, {bool isVideo = false}) async {
+    try {
+      XFile? file;
+      if (isVideo) {
+        file = await _picker.pickVideo(source: source);
+      } else {
+        file = await _picker.pickImage(source: source);
+      }
+
+      if (file != null && currentNote.value != null) {
+        final id = DateTime.now().millisecondsSinceEpoch.toString();
+        final block = AttachmentBlock(
+          id: id,
+          attachmentId: 0,
+          displayName: file.name,
+          localPath: file.path,
+        );
+        
+        if (activeBlockIndex >= 0 && activeBlockIndex < blocks.length) {
+          blocks.insert(activeBlockIndex + 1, block);
+          activeBlockIndex++;
+        } else {
+          blocks.add(block);
+          activeBlockIndex = blocks.length - 1;
+        }
+        
+        addTextBlock(); // Write text under image/video
+
+        if (currentNote.value!.id != 0) {
+          await _noteService.uploadAttachment(
+            currentNote.value!.id,
+            file.path,
+            id,
+            blocks.length,
+          );
+        }
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Could not add attachment");
+    }
+  }
+
+  void addTableBlock() {
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    final block = TableBlock(id: id, rows: [
+      ["", ""],
+      ["", ""]
+    ]);
+
+    if (activeBlockIndex >= 0 && activeBlockIndex < blocks.length) {
+      blocks.insert(activeBlockIndex + 1, block);
+      activeBlockIndex++;
+    } else {
+      blocks.add(block);
+      activeBlockIndex = blocks.length - 1;
+    }
+    addTextBlock();
+  }
+
+  void addDrawingBlock() {
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    final block = DrawingBlock(id: id);
+
+    if (activeBlockIndex >= 0 && activeBlockIndex < blocks.length) {
+      blocks.insert(activeBlockIndex + 1, block);
+      activeBlockIndex++;
+    } else {
+      blocks.add(block);
+      activeBlockIndex = blocks.length - 1;
+    }
+    addTextBlock();
+  }
+
+  void updateTextBlockStyle(int index, String style) {
+    if (blocks[index] is TextBlock) {
+      final oldBlock = blocks[index] as TextBlock;
+      blocks[index] = TextBlock(
+        id: oldBlock.id,
+        text: oldBlock.text,
+        style: style,
+      );
+    }
   }
 
   // Note List Management Features
