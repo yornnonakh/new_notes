@@ -319,10 +319,15 @@ class NoteListView extends GetView<NoteController> {
               ),
             ),
             const SizedBox(width: 16),
-            IconButton(
-              onPressed: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"folderId": folder.id, "noteId": 0})
-                  ?.then((value) => controller.fetchNotes(folderId: folder.id)),
-              icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 32),
+            LiquidGlassContainer(
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              child: IconButton(
+                onPressed: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"folderId": folder.id, "noteId": 0})
+                    ?.then((value) => controller.fetchNotes(folderId: folder.id)),
+                icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 28),
+              ),
             ),
           ],
         ),
