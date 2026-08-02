@@ -260,7 +260,7 @@ class RecentlyDeletedView extends GetView<RecentlyDeletedController> {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
+                    boxShadow: theme.brightness == Brightness.dark ? null : [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,

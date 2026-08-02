@@ -296,7 +296,7 @@ class NoteListView extends GetView<NoteController> {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
+                    boxShadow: theme.brightness == Brightness.dark ? null : [
                       BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
                     ],
                   ),
