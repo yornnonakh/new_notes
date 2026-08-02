@@ -34,6 +34,7 @@ class NoteContextMenu extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildMenuItem(
+                        context,
                         "View as Gallery",
                         Icons.grid_view_rounded,
                         onTap: () {
@@ -41,8 +42,9 @@ class NoteContextMenu extends StatelessWidget {
                           controller.toggleViewMode();
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Select Notes",
                         Icons.check_circle_outline,
                         onTap: () {
@@ -50,8 +52,9 @@ class NoteContextMenu extends StatelessWidget {
                           controller.toggleEditing();
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Sort By",
                         Icons.swap_vert_rounded,
                         subtitle: "Default (Date Edited)",
@@ -61,8 +64,9 @@ class NoteContextMenu extends StatelessWidget {
                           controller.updateSorting("Date Edited");
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "Group By Date",
                         Icons.calendar_view_day_rounded,
                         subtitle: "Default (On)",
@@ -72,8 +76,9 @@ class NoteContextMenu extends StatelessWidget {
                           controller.toggleDateGrouping();
                         },
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildMenuItem(
+                        context,
                         "View Attachments",
                         Icons.attach_file_rounded,
                         onTap: () {
@@ -97,33 +102,40 @@ class NoteContextMenu extends StatelessWidget {
   }
 
   Widget _buildMenuItem(
+    BuildContext context,
     String title,
     IconData icon, {
     String? subtitle,
     Widget? trailing,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return ListTile(
       onTap: onTap,
       dense: true,
       visualDensity: VisualDensity.compact,
-      leading: Icon(icon, color: AppTheme.textPrimary, size: 22),
+      leading: Icon(icon, color: theme.colorScheme.onSurface, size: 22),
       title: Text(
         title,
-        style: const TextStyle(
-          color: AppTheme.textPrimary,
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
           fontSize: 17,
           fontWeight: FontWeight.w400,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: const TextStyle(color: AppTheme.textGrey, fontSize: 13))
+          ? Text(subtitle, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13))
           : null,
       trailing: trailing,
     );
   }
 
-  Widget _buildDivider() {
-    return const Divider(indent: 56, height: 1, thickness: 0.5);
+  Widget _buildDivider(BuildContext context) {
+    return Divider(
+      indent: 56, 
+      height: 1, 
+      thickness: 0.5,
+      color: Theme.of(context).dividerColor,
+    );
   }
 }

@@ -10,50 +10,49 @@ class SearchView extends GetView<sc.SearchController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: Obx(() {
                 if (controller.isSearching.value) {
-                  return _buildSearchResults();
+                  return _buildSearchResults(context);
                 }
-                return _buildSuggestedSection();
+                return _buildSuggestedSection(context);
               }),
             ),
-            _buildBottomSearchBar(),
+            _buildBottomSearchBar(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSuggestedSection() {
+  Widget _buildSuggestedSection(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 8, bottom: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
             child: Text(
               "Suggested",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
+              style: theme.textTheme.titleLarge,
             ),
           ),
           LiquidGlassContainer(
             borderRadius: 15,
-            opacity: 1.0, // White card look
+            opacity: 1.0, 
             child: Column(
               children: [
                 for (int i = 0; i < controller.suggestions.length; i++) ...[
                   _buildSuggestionTile(
+                    context,
                     controller.suggestions[i]['title'] as String,
                     controller.suggestions[i]['icon'] as IconData,
                   ),
@@ -68,28 +67,26 @@ class SearchView extends GetView<sc.SearchController> {
     );
   }
 
-  Widget _buildSuggestionTile(String title, IconData icon) {
+  Widget _buildSuggestionTile(BuildContext context, String title, IconData icon) {
+    final theme = Theme.of(context);
     return ListTile(
       onTap: () => controller.applyFilter(title),
       leading: Icon(icon, color: AppTheme.folderYellow, size: 24),
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 17,
-          color: AppTheme.textPrimary,
-          fontWeight: FontWeight.w400,
-        ),
+        style: theme.textTheme.bodyLarge,
       ),
     );
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(BuildContext context) {
+    final theme = Theme.of(context);
     return Obx(() {
       if (controller.noteResults.isEmpty && controller.folderResults.isEmpty) {
-        return const Center(
+        return Center(
           child: Text(
             "No results found",
-            style: TextStyle(color: AppTheme.textGrey),
+            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         );
       }
@@ -98,51 +95,47 @@ class SearchView extends GetView<sc.SearchController> {
         padding: const EdgeInsets.all(16),
         children: [
           if (controller.folderResults.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.only(left: 8, bottom: 12),
-              child: Text("Folders", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 12),
+              child: Text("Folders", style: theme.textTheme.titleLarge),
             ),
-            Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-              child: Column(
-                children: [
-                  for (int i = 0; i < controller.folderResults.length; i++) ...[
-                    ListTile(
-                      onTap: () => Get.toNamed(Routes.NOTE_LIST, arguments: controller.folderResults[i]),
-                      leading: Icon(controller.folderResults[i].icon, color: controller.folderResults[i].color),
-                      title: Text(controller.folderResults[i].name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                      trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                    ),
-                    if (i < controller.folderResults.length - 1)
-                      const Divider(indent: 56, height: 1),
-                  ],
+            GlassCard(
+              borderRadius: 20,
+              children: [
+                for (int i = 0; i < controller.folderResults.length; i++) ...[
+                  ListTile(
+                    onTap: () => Get.toNamed(Routes.NOTE_LIST, arguments: controller.folderResults[i]),
+                    leading: Icon(controller.folderResults[i].icon, color: AppTheme.folderYellow),
+                    title: Text(controller.folderResults[i].name, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    trailing: Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
+                  ),
+                  if (i < controller.folderResults.length - 1)
+                    const Divider(indent: 56, height: 1),
                 ],
-              ),
+              ],
             ),
             const SizedBox(height: 24),
           ],
           
           if (controller.noteResults.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.only(left: 8, bottom: 12),
-              child: Text("Notes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 12),
+              child: Text("Notes", style: theme.textTheme.titleLarge),
             ),
-            Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-              child: Column(
-                children: [
-                  for (int i = 0; i < controller.noteResults.length; i++) ...[
-                    ListTile(
-                      onTap: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"noteId": controller.noteResults[i].id}),
-                      title: Text(controller.noteResults[i].title.isEmpty ? "New Note" : controller.noteResults[i].title, 
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                      trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textGrey),
-                    ),
-                    if (i < controller.noteResults.length - 1)
-                      const Divider(indent: 16, height: 1),
-                  ],
+            GlassCard(
+              borderRadius: 20,
+              children: [
+                for (int i = 0; i < controller.noteResults.length; i++) ...[
+                  ListTile(
+                    onTap: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"noteId": controller.noteResults[i].id}),
+                    title: Text(controller.noteResults[i].title.isEmpty ? "New Note" : controller.noteResults[i].title, 
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    trailing: Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
+                  ),
+                  if (i < controller.noteResults.length - 1)
+                    const Divider(indent: 16, height: 1),
                 ],
-              ),
+              ],
             ),
           ],
         ],
@@ -150,7 +143,8 @@ class SearchView extends GetView<sc.SearchController> {
     });
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -160,7 +154,7 @@ class SearchView extends GetView<sc.SearchController> {
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
@@ -173,21 +167,22 @@ class SearchView extends GetView<sc.SearchController> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.search, color: AppTheme.textGrey, size: 22),
+                    Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant, size: 22),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: controller.searchController,
                         onChanged: controller.onSearchChanged,
                         autofocus: true,
-                        decoration: const InputDecoration(
+                        style: theme.textTheme.bodyLarge,
+                        decoration: InputDecoration(
                           hintText: "Search",
-                          hintStyle: TextStyle(color: AppTheme.textGrey, fontSize: 17),
+                          hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 17),
                           border: InputBorder.none,
                         ),
                       ),
                     ),
-                    const Icon(Icons.mic, color: AppTheme.textGrey, size: 22),
+                    Icon(Icons.mic, color: theme.colorScheme.onSurfaceVariant, size: 22),
                   ],
                 ),
               ),
@@ -205,7 +200,7 @@ class SearchView extends GetView<sc.SearchController> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -214,7 +209,7 @@ class SearchView extends GetView<sc.SearchController> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.close, color: AppTheme.textPrimary, size: 20),
+                child: Icon(Icons.close, color: theme.colorScheme.onSurface, size: 20),
               ),
             ),
           ],
@@ -223,7 +218,7 @@ class SearchView extends GetView<sc.SearchController> {
     );
   }
 
-  Widget _buildBottomSearchBar() {
-    return _buildBottomBar();
+  Widget _buildBottomSearchBar(BuildContext context) {
+    return _buildBottomBar(context);
   }
 }

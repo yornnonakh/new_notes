@@ -15,13 +15,17 @@ class NoteListView extends GetView<NoteController> {
   @override
   Widget build(BuildContext context) {
     final FolderModel? folder = Get.arguments;
+    final theme = Theme.of(context);
 
     if (folder == null) {
-      return const Scaffold(body: Center(child: Text("Error: No folder selected")));
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: const Center(child: Text("Error: No folder selected")),
+      );
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -39,7 +43,7 @@ class NoteListView extends GetView<NoteController> {
                       height: 44,
                       child: IconButton(
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.chevron_left, color: AppTheme.textSecondary, size: 36),
+                        icon: Icon(Icons.chevron_left, color: theme.colorScheme.onSurfaceVariant, size: 36),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -68,14 +72,14 @@ class NoteListView extends GetView<NoteController> {
                         child: LiquidGlassContainer(
                           width: 44,
                           height: 44,
-                          child: const Center(
-                            child: Icon(
-                              Icons.more_horiz,
-                              color: AppTheme.textPrimary,
-                              size: 20,
+                          child: Center(
+                              child: Icon(
+                                Icons.more_horiz,
+                                color: theme.colorScheme.onSurface,
+                                size: 20,
+                              ),
                             ),
                           ),
-                        ),
                       );
                     }),
                   ],
@@ -92,11 +96,11 @@ class NoteListView extends GetView<NoteController> {
                   children: [
                     Text(
                       folder.name,
-                      style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      style: theme.textTheme.headlineLarge,
                     ),
                     Obx(() => Text(
                       "${controller.notes.length} Notes",
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textGrey, fontWeight: FontWeight.w400),
+                      style: theme.textTheme.bodySmall,
                     )),
                   ],
                 ),
@@ -105,16 +109,16 @@ class NoteListView extends GetView<NoteController> {
 
             Obx(() {
               if (controller.isLoading.value) {
-                return const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator(color: AppTheme.folderYellow)),
+                return SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator(color: theme.primaryColor)),
                 );
               }
               
               if (controller.notes.isEmpty) {
-                return const SliverFillRemaining(
+                return SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
-                    child: Text("No Notes", style: TextStyle(color: AppTheme.textGrey, fontSize: 18)),
+                    child: Text("No Notes", style: theme.textTheme.bodyLarge),
                   ),
                 );
               }
@@ -134,22 +138,18 @@ class NoteListView extends GetView<NoteController> {
                         Padding(
                           padding: const EdgeInsets.only(left: 8, bottom: 8),
                           child: Text(section, 
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.textPrimary)),
+                            style: theme.textTheme.titleLarge),
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            children: [
-                              for (int i = 0; i < sectionNotes.length; i++) ...[
-                                _buildNoteTile(sectionNotes[i], folder.id),
-                                if (i < sectionNotes.length - 1)
-                                  const Divider(indent: 16, height: 1),
-                              ],
+                        GlassCard(
+                          borderRadius: 20,
+                          padding: EdgeInsets.zero,
+                          children: [
+                            for (int i = 0; i < sectionNotes.length; i++) ...[
+                              _buildNoteTile(context, sectionNotes[i], folder.id),
+                              if (i < sectionNotes.length - 1)
+                                const Divider(indent: 56, height: 1),
                             ],
-                          ),
+                          ],
                         ),
                       ],
                     ),
@@ -164,14 +164,15 @@ class NoteListView extends GetView<NoteController> {
       ),
       bottomNavigationBar: Obx(() {
         if (controller.isEditing.value) {
-          return _buildEditBottomBar(folder);
+          return _buildEditBottomBar(context, folder);
         }
-        return _buildBottomBar(folder);
+        return _buildBottomBar(context, folder);
       }),
     );
   }
 
-  Widget _buildNoteTile(NoteModel note, int folderId) {
+  Widget _buildNoteTile(BuildContext context, NoteModel note, int folderId) {
+    final theme = Theme.of(context);
     final attachment = note.content.firstWhereOrNull((b) => b is AttachmentBlock) as AttachmentBlock?;
 
     return Obx(() {
@@ -194,20 +195,20 @@ class NoteListView extends GetView<NoteController> {
                 height: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppTheme.textPrimary : Colors.transparent,
+                  color: isSelected ? theme.colorScheme.onSurface : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? AppTheme.textPrimary : Colors.grey.shade400,
+                    color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 14)
+                    ? Icon(Icons.check, color: theme.colorScheme.surface, size: 14)
                     : null,
               )
             : null,
         title: Text(
           note.title.isEmpty ? "New Note" : note.title,
-          style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 17),
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -215,7 +216,7 @@ class NoteListView extends GetView<NoteController> {
           padding: const EdgeInsets.only(top: 2),
           child: Text(
             "${_formatTime(note.updatedAt)}  ${_getContentSnippet(note)}",
-            style: const TextStyle(color: AppTheme.textGrey, fontSize: 15),
+            style: theme.textTheme.bodyMedium,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -234,12 +235,13 @@ class NoteListView extends GetView<NoteController> {
                   ),
                 ),
               )
-            : (isEditing ? null : const Icon(Icons.chevron_right, color: AppTheme.dividerColor, size: 20)),
+            : (isEditing ? null : Icon(Icons.chevron_right, color: theme.colorScheme.outline, size: 20)),
       );
     });
   }
 
-  Widget _buildEditBottomBar(FolderModel folder) {
+  Widget _buildEditBottomBar(BuildContext context, FolderModel folder) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -251,36 +253,8 @@ class NoteListView extends GetView<NoteController> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => controller.moveSelectedNotes(context, folder.id),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4)),
-                      ],
-                    ),
-                    child: Text(moveText, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => controller.deleteSelectedNotes(folder.id),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4)),
-                    ],
-                  ),
-                  child: Text(deleteText, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
-                ),
-              ),
+              _actionButton(context, moveText, onTap: () => controller.moveSelectedNotes(context, folder.id)),
+              _actionButton(context, deleteText, onTap: () => controller.deleteSelectedNotes(folder.id)),
             ],
           );
         }),
@@ -288,7 +262,27 @@ class NoteListView extends GetView<NoteController> {
     );
   }
 
-  Widget _buildBottomBar(FolderModel folder) {
+  Widget _actionButton(BuildContext context, String label, {Color? color, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: LiquidGlassContainer(
+        borderRadius: 25,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color ?? theme.colorScheme.onSurface,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(BuildContext context, FolderModel folder) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -300,7 +294,7 @@ class NoteListView extends GetView<NoteController> {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
@@ -309,10 +303,10 @@ class NoteListView extends GetView<NoteController> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: AppTheme.textGrey, size: 22),
+                      Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant, size: 22),
                       const SizedBox(width: 8),
-                      const Expanded(child: Text("Search", style: TextStyle(color: AppTheme.textGrey, fontSize: 17))),
-                      const Icon(Icons.mic, color: AppTheme.textGrey, size: 22),
+                      Expanded(child: Text("Search", style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 17))),
+                      Icon(Icons.mic, color: theme.colorScheme.onSurfaceVariant, size: 22),
                     ],
                   ),
                 ),
@@ -326,7 +320,7 @@ class NoteListView extends GetView<NoteController> {
               child: IconButton(
                 onPressed: () => Get.toNamed(Routes.NOTE_DETAIL, arguments: {"folderId": folder.id, "noteId": 0})
                     ?.then((value) => controller.fetchNotes(folderId: folder.id)),
-                icon: const Icon(Icons.open_in_new, color: AppTheme.textPrimary, size: 28),
+                icon: Icon(Icons.open_in_new, color: theme.colorScheme.onSurface, size: 28),
               ),
             ),
           ],

@@ -10,8 +10,11 @@ class ProfileView extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.bodyColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: true,
         child: CustomScrollView(
@@ -28,8 +31,12 @@ class ProfileView extends GetView<ProfileController> {
                       borderRadius: 22,
                       child: IconButton(
                         onPressed: () => Get.back(),
-                        icon: const Icon(Icons.chevron_left, color: AppTheme.textSecondary, size: 36,
-                            ),padding: EdgeInsets.zero
+                        icon: Icon(
+                          Icons.chevron_left, 
+                          color: theme.colorScheme.onSurfaceVariant, 
+                          size: 36,
+                        ),
+                        padding: EdgeInsets.zero,
                       ),
                     ),
                     const Spacer(),
@@ -39,12 +46,12 @@ class ProfileView extends GetView<ProfileController> {
             ),
 
             // Large Title Area
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 child: Text(
                   "Profile",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  style: theme.textTheme.headlineLarge,
                 ),
               ),
             ),
@@ -62,14 +69,14 @@ class ProfileView extends GetView<ProfileController> {
                           Container(
                             width: 120,
                             height: 120,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
+                                  color: isDark ? Colors.black26 : Colors.black12,
                                   blurRadius: 10,
-                                  offset: Offset(0, 5),
+                                  offset: const Offset(0, 5),
                                 ),
                               ],
                             ),
@@ -78,12 +85,12 @@ class ProfileView extends GetView<ProfileController> {
                           const SizedBox(height: 20),
                           Obx(() => Text(
                             controller.userName.value,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                           )),
-                          Text(
+                          Obx(() => Text(
                             controller.userPhone.value,
-                            style: const TextStyle(color: AppTheme.textGrey),
-                          ),
+                            style: theme.textTheme.bodyMedium,
+                          )),
                         ],
                       ),
                     ),
@@ -91,11 +98,14 @@ class ProfileView extends GetView<ProfileController> {
                     const SizedBox(height: 32),
                     
                     // Appearance Section
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 8, bottom: 8),
-                        child: Text("Appearance", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                        padding: const EdgeInsets.only(left: 8, bottom: 8),
+                        child: Text(
+                          "Appearance", 
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                     
@@ -103,9 +113,9 @@ class ProfileView extends GetView<ProfileController> {
                       borderRadius: 20,
                       children: [
                         _buildThemeOption(context, "Light Mode", Icons.light_mode_outlined, ThemeMode.light),
-                        const Divider(indent: 56, height: 1),
+                        Divider(indent: 56, height: 1, color: theme.dividerColor),
                         _buildThemeOption(context, "Dark Mode", Icons.dark_mode_outlined, ThemeMode.dark),
-                        const Divider(indent: 56, height: 1),
+                        Divider(indent: 56, height: 1, color: theme.dividerColor),
                         _buildThemeOption(context, "System Default", Icons.settings_brightness_outlined, ThemeMode.system),
                       ],
                     ).animate().fadeIn(delay: const Duration(milliseconds: 200)).slideY(begin: 0.1, end: 0),
@@ -137,14 +147,20 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildThemeOption(BuildContext context, String title, IconData icon, ThemeMode mode) {
+    final theme = Theme.of(context);
     return Obx(() {
       final isSelected = controller.currentThemeMode.value == mode;
-      final isDark = Theme.of(context).brightness == Brightness.dark;
       
       return ListTile(
         onTap: () => controller.changeTheme(mode),
-        leading: Icon(icon, color: isSelected ? AppTheme.folderYellow : (isDark ? Colors.white70 : AppTheme.textGrey)),
-        title: Text(title, style: TextStyle(color: isDark ? Colors.white : AppTheme.textPrimary)),
+        leading: Icon(
+          icon, 
+          color: isSelected ? AppTheme.folderYellow : theme.colorScheme.onSurfaceVariant,
+        ),
+        title: Text(
+          title, 
+          style: theme.textTheme.bodyLarge,
+        ),
         trailing: isSelected 
             ? Container(
                 width: 24,
