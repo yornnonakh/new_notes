@@ -4,8 +4,14 @@ import 'package:get_storage/get_storage.dart';
 import 'app/data/services/initial_binding.dart';
 import 'app/routes/app_pages.dart';
 import 'app/theme/app_theme.dart';
-
 import 'app/data/services/theme_service.dart';
+
+/*
+  App: Piisiit Notes
+  Date: 08.02.2026
+  Update by: branch nona_developer
+  Feature: dark mode and light mode
+ */
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

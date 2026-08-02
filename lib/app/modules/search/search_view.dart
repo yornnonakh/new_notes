@@ -145,6 +145,7 @@ class SearchView extends GetView<sc.SearchController> {
 
   Widget _buildBottomBar(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -156,7 +157,7 @@ class SearchView extends GetView<sc.SearchController> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
+                  boxShadow: isDark ? null : [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
@@ -202,7 +203,7 @@ class SearchView extends GetView<sc.SearchController> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   shape: BoxShape.circle,
-                  boxShadow: [
+                  boxShadow: isDark ? null : [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,

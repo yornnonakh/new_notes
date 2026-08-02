@@ -255,10 +255,7 @@ class AppTheme {
 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: darkFolderYellow,
-          width: 1,
-        ),
+        borderSide: BorderSide.none,
       ),
 
       contentPadding: const EdgeInsets.symmetric(

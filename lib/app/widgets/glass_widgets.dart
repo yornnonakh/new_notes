@@ -39,12 +39,12 @@ class LiquidGlassContainer extends StatelessWidget {
                 ? Colors.white.withValues(alpha: 0.1) 
                 : AppTheme.cardColor.withValues(alpha: opacity),
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: isDark 
-                  ? Colors.white.withValues(alpha: 0.1) 
-                  : AppTheme.dividerColor,
-              width: 0.5,
-            ),
+            border: isDark 
+                ? null 
+                : Border.all(
+                    color: AppTheme.dividerColor,
+                    width: 0.5,
+                  ),
           ),
           child: child,
         ),
