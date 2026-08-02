@@ -7,8 +7,9 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/models/note_model.dart';
-import '../../theme/app_theme.dart';
+import '../../widgets/glass_widgets.dart';
 import 'note_controller.dart';
+import '../../theme/app_theme.dart';
 
 class NoteDetailView extends GetView<NoteController> {
   const NoteDetailView({super.key});
@@ -68,23 +69,14 @@ class NoteDetailView extends GetView<NoteController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Left: Back button
-              GestureDetector(
-                onTap: Get.back,
-                child: Container(
-                  width: controlSize,
-                  height: controlSize,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
+              LiquidGlassContainer(
+                width: controlSize,
+                height: controlSize,
+                borderRadius: controlSize / 2,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: Get.back,
+                  icon: Icon(
                     CupertinoIcons.chevron_left,
                     color: AppTheme.folderYellow,
                     size: 24,
@@ -101,20 +93,24 @@ class NoteDetailView extends GetView<NoteController> {
                   const SizedBox(width: 8),
                   _circleAction(CupertinoIcons.ellipsis, onTap: () {}),
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: controller.saveNote,
-                    child: Container(
-                      width: controlSize,
-                      height: controlSize,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.folderYellow,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          CupertinoIcons.checkmark,
-                          color: Colors.white,
-                          size: 20,
+                  LiquidGlassContainer(
+                    width: controlSize,
+                    height: controlSize,
+                    borderRadius: controlSize / 2,
+                    opacity: 1.0, // Solid yellow look
+                    child: GestureDetector(
+                      onTap: controller.saveNote,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: AppTheme.folderYellow,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            CupertinoIcons.checkmark,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
@@ -129,27 +125,33 @@ class NoteDetailView extends GetView<NoteController> {
   }
 
   Widget _circleAction(IconData icon, {required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return LiquidGlassContainer(
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Center(
+          child: Icon(
+            icon,
+            color: AppTheme.textPrimary,
+            size: 20,
+          ),
         ),
-        child: Icon(
-          icon,
-          color: AppTheme.textPrimary,
-          size: 20,
-        ),
+      ),
+    );
+  }
+
+  Widget _toolbarIcon({required IconData icon, required VoidCallback onTap}) {
+    return LiquidGlassContainer(
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      opacity: 0.1, // Subtle glass effect for toolbar tools
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: onTap,
+        icon: Icon(icon, color: AppTheme.textPrimary, size: 22),
       ),
     );
   }
@@ -436,7 +438,7 @@ class NoteDetailView extends GetView<NoteController> {
                 // Left Floating Pill (Checklist, Attachment, Drawing)
                 Container(
                   height: controlHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(25),
@@ -450,59 +452,31 @@ class NoteDetailView extends GetView<NoteController> {
                   ),
                   child: Row(
                     children: [
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                        onPressed: controller.addChecklistBlock,
-                        icon: const Icon(
-                          Icons.checklist_rtl_rounded,
-                          color: AppTheme.textPrimary,
-                          size: 24,
-                        ),
+                      _toolbarIcon(
+                        icon: Icons.checklist_rtl_rounded,
+                        onTap: controller.addChecklistBlock,
                       ),
                       const SizedBox(width: 4),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                        onPressed: () {},
-                        icon: const Icon(
-                          CupertinoIcons.paperclip,
-                          color: AppTheme.textPrimary,
-                          size: 22,
-                        ),
+                      _toolbarIcon(
+                        icon: CupertinoIcons.paperclip,
+                        onTap: () {},
                       ),
                       const SizedBox(width: 4),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                        onPressed: () {},
-                        icon: const Icon(
-                          CupertinoIcons.pencil_outline,
-                          color: AppTheme.textPrimary,
-                          size: 22,
-                        ),
+                      _toolbarIcon(
+                        icon: CupertinoIcons.pencil_outline,
+                        onTap: () {},
                       ),
                     ],
                   ),
                 ),
 
                 // Right Floating Circle (New note / Edit button)
-                GestureDetector(
-                  onTap: controller.saveNote,
-                  child: Container(
-                    width: controlHeight,
-                    height: controlHeight,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                LiquidGlassContainer(
+                  width: controlHeight,
+                  height: controlHeight,
+                  borderRadius: controlHeight / 2,
+                  child: GestureDetector(
+                    onTap: controller.saveNote,
                     child: const Center(
                       child: Icon(
                         CupertinoIcons.square_pencil,

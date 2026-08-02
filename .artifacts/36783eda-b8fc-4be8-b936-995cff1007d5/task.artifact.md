@@ -1,5 +1,5 @@
-- [ ] Update `NoteService` to combine `trash` and `archive` notes
-- [ ] Refine `RecentlyDeletedController` with robust fetching and auto-refresh
-- [ ] Refine `TrashController` to match the new fetching logic
-- [ ] Update `RecentlyDeletedView` and `TrashView` visuals
-- [ ] Verify data visibility with live delete actions
+- [ ] Update `FolderResponse` to include `archive` folders
+- [ ] Refine `NoteService.getTrashNotes` to combine all deleted buckets
+- [ ] Implement Sticky Header in `RecentlyDeletedView`
+- [ ] Implement Sticky Header in `TrashView`
+- [ ] Verify visibility and scrolling behavior

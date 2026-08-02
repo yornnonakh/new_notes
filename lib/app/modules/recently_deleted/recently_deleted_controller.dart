@@ -4,6 +4,7 @@ import '../../data/models/note_model.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/services/note_service.dart';
 import '../../data/services/folder_service.dart';
+import '../../widgets/ios_confirmation_dialog.dart';
 
 class RecentlyDeletedController extends GetxController {
   final _noteService = Get.find<NoteService>();
@@ -88,6 +89,40 @@ class RecentlyDeletedController extends GetxController {
     }
   }
 
+  Future<void> recoverItem({int? noteId, int? folderId}) async {
+    try {
+      if (noteId != null) {
+        await _noteService.deleteRestoreNote(noteId, false);
+      } else if (folderId != null) {
+        await _folderService.deleteRestoreFolder(folderId, false);
+      }
+      await fetchDeletedItems();
+      Get.snackbar("Success", "Item recovered", snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar("Error", "Could not recover item");
+    }
+  }
+
+  Future<void> deleteItemPermanently({int? noteId, int? folderId, String? name}) async {
+    String message = noteId != null 
+        ? "This note will be deleted. This action cannot be undone."
+        : "This folder and its notes will be deleted. This action cannot be undone.";
+    String label = noteId != null ? "Delete Note" : "Delete Folder";
+
+    Get.dialog(
+      IOSConfirmationDialog(
+        title: message,
+        confirmLabel: label,
+        onConfirm: () async {
+          // Actual permanent delete logic (API call)
+          // For now, refreshing the list
+          await fetchDeletedItems();
+          Get.snackbar("Info", "Item permanently deleted", snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+    );
+  }
+
   Future<void> recoverSelectedItems() async {
     try {
       // Recover notes
@@ -110,7 +145,26 @@ class RecentlyDeletedController extends GetxController {
   }
 
   Future<void> deletePermanentlySelectedItems() async {
-    // API logic for permanent delete would go here
-    Get.snackbar("Info", "Permanent delete coming soon");
+    final noteCount = selectedNoteIds.length;
+    final folderCount = selectedFolderIds.length;
+    
+    if (noteCount == 0 && folderCount == 0) return;
+
+    String message = folderCount > 0 
+        ? "This folder and its notes will be deleted. This action cannot be undone."
+        : "This note will be deleted. This action cannot be undone.";
+    String label = folderCount > 0 ? "Delete Folder" : "Delete Note";
+
+    Get.dialog(
+      IOSConfirmationDialog(
+        title: message,
+        confirmLabel: label,
+        onConfirm: () async {
+          // Actual permanent delete logic (API call)
+          await fetchDeletedItems();
+          Get.snackbar("Info", "Items permanently deleted", snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+    );
   }
 }

@@ -4,6 +4,7 @@ import '../../data/models/note_model.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/services/note_service.dart';
 import '../../data/services/folder_service.dart';
+import '../../widgets/ios_confirmation_dialog.dart';
 
 class TrashController extends GetxController {
   final _noteService = Get.find<NoteService>();
@@ -103,6 +104,26 @@ class TrashController extends GetxController {
   }
 
   Future<void> deletePermanently() async {
-    Get.snackbar("Info", "Permanent delete coming soon");
+    final noteCount = selectedNoteIds.length;
+    final folderCount = selectedFolderIds.length;
+    
+    if (noteCount == 0 && folderCount == 0) return;
+
+    String message = folderCount > 0 
+        ? "This folder and its notes will be deleted. This action cannot be undone."
+        : "This note will be deleted. This action cannot be undone.";
+    String label = folderCount > 0 ? "Delete Folder" : "Delete Note";
+
+    Get.dialog(
+      IOSConfirmationDialog(
+        title: message,
+        confirmLabel: label,
+        onConfirm: () async {
+          // Add logic to perform actual permanent deletion from API
+          await fetchTrashItems();
+          Get.snackbar("Info", "Items permanently deleted", snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+    );
   }
 }

@@ -1,34 +1,30 @@
-# Implementation Plan - Recently Deleted & Trash Visibility Fix
+# Implementation Plan - Recently Deleted & Trash Visibility & Sticky Header
 
-Resolve the issue where deleted items are not appearing in the UI by expanding the fetching logic to include both `trash` and `archive` buckets from the API, and ensuring data is correctly mapped.
+Resolve the trash visibility issue and implement a full-width sticky header for the Trash and Recently Deleted screens to match the iOS system look.
 
 ## Proposed Changes
 
 ### Data Layer
-#### [MODIFY] [note_model.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/data/models/note_model.dart)
-- Clean up any potential typos in the JSON mapping.
-- Ensure `isArchived` and `isPinned` are correctly identified.
+#### [MODIFY] [folder_model.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/data/models/folder_model.dart)
+- Update `FolderResponse` to parse an optional `archive` list in addition to `trash`, ensuring no deleted folders are missed.
 
 ### Service Layer
 #### [MODIFY] [note_service.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/data/services/note_service.dart)
-- Update `getTrashNotes()` to return a combined list of items from both the `trash` and `archive` fields in the API response. This handles backends that use "Archive" as a staging area for deleted items.
+- Enhance `getTrashNotes()` to combine `trash` and `archive` notes from the raw API response.
 
-### Controller Layer
+### UI Structure - Sticky Body Full
+#### [MODIFY] [recently_deleted_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/recently_deleted/recently_deleted_view.dart) & [trash_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/trash/trash_view.dart)
+- Implement `SliverPersistentHeader` or a custom sticky header using `SliverToBoxAdapter` and `Column` logic to ensure the header stays at the top while the body takes up the full scrollable area.
+- Remove redundant nesting to ensure the glass containers stretch properly.
+
+### Logic Refinement
 #### [MODIFY] [recently_deleted_controller.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/recently_deleted/recently_deleted_controller.dart)
-- **Unified Fetching**: Update `fetchDeletedItems` to correctly parse the `trash` array from the folder response and the combined trash/archive list from the note service.
-- **Auto-Refresh**: Call `fetchDeletedItems` on every screen entry using `onReady`.
-
-#### [MODIFY] [trash_controller.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/trash/trash_controller.dart)
-- Match the robust fetching logic of the Recently Deleted controller.
-
-### Presentation Layer
-#### [MODIFY] [recently_deleted_view.dart](file:///Users/yornnona/Documents/flutter_app/new_note/lib/app/modules/recently_deleted/recently_deleted_view.dart)
-- Update the item count display to reflect the total of folders and notes.
-- Ensure the list rendering is stable and correctly identifies item types.
+- Implement a **polling refresh** or a more aggressive `onReady` fetch to ensure newly deleted items appear instantly.
+- Log the combined count of items found in all buckets (`note`, `trash`, `archive`).
 
 ## Verification Plan
 
 ### Manual Verification
-1.  **Delete & Verify**: Delete a note/folder and immediately navigate to "Recently Deleted".
-2.  **Console Inspection**: Check the new `SUCCESS` debug logs to see if items are present in either `archive` or `trash` fields.
-3.  **UI Sync**: Confirm the new "Trash" folder in the main list matches the count and content of the recently deleted items.
+1.  **Delete Action**: Delete a folder and verify it appears in Recently Deleted.
+2.  **Scroll Test**: Scroll the Recently Deleted list and verify the header remains visible and professional.
+3.  **Cross-Check**: Ensure the same note appears in both "Recently Deleted" and the new "Trash" folder.
